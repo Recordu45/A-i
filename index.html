@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Loan Collection Agent — Hindi Voice & Compliance Dashboard</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .hindi-text {
+      font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
+    }
+    .pulse-ring {
+      animation: pulseRing 1.6s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50">
+
+  <!-- Top Compliance & Role Header -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 font-bold text-lg">
+          वाणी
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold tracking-tight">AI Loan Collection Agent</h1>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              Hindi + English AI Voice
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Bharat Samriddhi Finance Ltd. • RBI Fair Practices & DPDP Compliant</p>
+        </div>
+      </div>
+
+      <!-- Right Controls: Simulated IST Clock + RBAC Role Switcher + Telephony Mode Badge -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
+        <div class="flex items-center gap-1.5 bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700">
+          <span class="text-slate-400">IST Hour:</span>
+          <select id="simHourSelect" class="bg-slate-900 text-emerald-300 font-semibold rounded px-1.5 py-0.5 border border-slate-700 focus:outline-none">
+            <option value="7">07:00 IST (Blocked - Early)</option>
+            <option value="9">09:00 IST (Permitted)</option>
+            <option value="11" selected>11:00 IST (Permitted)</option>
+            <option value="15">15:00 IST (Permitted)</option>
+            <option value="18">18:00 IST (Permitted)</option>
+            <option value="20">20:00 IST (Blocked - After 7PM)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700">
+          <span class="text-slate-400">Role:</span>
+          <select id="rbacRoleSelect" class="bg-slate-900 text-amber-300 font-semibold rounded px-1.5 py-0.5 border border-slate-700 focus:outline-none">
+            <option value="supervisor" selected>Supervisor (Priya Singh)</option>
+            <option value="collection_agent">Agent (Amit Verma)</option>
+            <option value="auditor">Auditor (Masked Phone/Read-Only)</option>
+          </select>
+        </div>
+
+        <span id="telephonyModeBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          Mode: Safe Hindi Simulator
+        </span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs (Mobile-Friendly Horizontal Scroll) -->
+    <nav class="bg-slate-950/60 border-t border-slate-800/80 overflow-x-auto">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 flex items-center space-x-1 py-1.5 text-xs sm:text-sm font-medium whitespace-nowrap">
+        <button data-tab="dashboard" class="nav-tab-btn px-3.5 py-2 rounded-lg bg-emerald-600 text-white transition">
+          1. Dashboard & Queue
+        </button>
+        <button data-tab="customers" class="nav-tab-btn px-3.5 py-2 rounded-lg text-slate-300 hover:bg-slate-800 transition">
+          2. Customer DB & CSV
+        </button>
+        <button data-tab="calling" class="nav-tab-btn px-3.5 py-2 rounded-lg text-slate-300 hover:bg-slate-800 transition">
+          3. Hindi AI Voice Caller
+        </button>
+        <button data-tab="ptp" class="nav-tab-btn px-3.5 py-2 rounded-lg text-slate-300 hover:bg-slate-800 transition">
+          4. PTP & Schedules
+        </button>
+        <button data-tab="reports" class="nav-tab-btn px-3.5 py-2 rounded-lg text-slate-300 hover:bg-slate-800 transition">
+          5. Reports & Audit Log
+        </button>
+        <button data-tab="architecture" class="nav-tab-btn px-3.5 py-2 rounded-lg text-slate-300 hover:bg-slate-800 transition">
+          6. Code, Costs & Android Setup
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Toast Notification Banner -->
+  <div id="toastBanner" class="hidden fixed bottom-4 right-4 z-50 max-w-md bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-emerald-500/50 flex items-start gap-3 text-sm">
+    <span id="toastIcon" class="text-emerald-400 font-bold text-base">✓</span>
+    <div class="flex-1">
+      <p id="toastTitle" class="font-semibold text-white">Action Completed</p>
+      <p id="toastDesc" class="text-xs text-slate-300 mt-0.5"></p>
+    </div>
+    <button id="closeToastBtn" class="text-slate-400 hover:text-white text-xs font-bold px-1">✕</button>
+  </div>
+
+  <!-- Main Workspace Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-5 space-y-6">
+
+    <!-- ===================================================================== -->
+    <!-- TAB 1: DASHBOARD & PRIORITIZED REMINDER WORKFLOW                       -->
+    <!-- ===================================================================== -->
+    <section id="tab-dashboard" class="tab-panel space-y-6">
+      <!-- Honest Telephony & RBI Banner -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-700 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">
+            <span>RBI Fair Practices Guardrails Active</span>
+            <span>•</span>
+            <span id="windowStatusBadge">Window: 08:00–19:00 IST</span>
+          </div>
+          <h2 class="text-lg sm:text-xl font-bold">Automated Hindi EMI Reminder & Promise-to-Pay (PTP) System</h2>
+          <p class="text-xs sm:text-sm text-slate-300 max-w-3xl">
+            Prioritizes upcoming and overdue accounts, masks sensitive loan numbers (<code class="text-emerald-300">LN-XXXX-1234</code>), verifies borrower identity before sharing EMI details, and automatically stops calls once payment is verified.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="quickRunBatchBtn" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold text-xs sm:text-sm transition shadow">
+            ▶ Run Priority Reminder Batch
+          </button>
+          <button id="jumpToVoiceSimulatorBtn" class="px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold text-xs sm:text-sm transition border border-slate-600">
+            🎙️ Open Hindi Voice Caller
+          </button>
+        </div>
+      </div>
+
+      <!-- 7 Required KPI Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+          <p class="text-xs font-medium text-slate-500">Assigned Customers</p>
+          <p id="kpiTotalCustomers" class="text-2xl font-bold text-slate-900 mt-1">8</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Authorized records</p>
+        </div>
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+          <p class="text-xs font-medium text-slate-500">Calls Attempted</p>
+          <p id="kpiCallsAttempted" class="text-2xl font-bold text-blue-600 mt-1">0</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Manual + Scheduled</p>
+        </div>
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+          <p class="text-xs font-medium text-slate-500">Calls Answered</p>
+          <p id="kpiCallsAnswered" class="text-2xl font-bold text-indigo-600 mt-1">0</p>
+          <p id="kpiAnswerRate" class="text-[11px] text-indigo-500 font-medium mt-0.5">0% answer rate</p>
+        </div>
+        <div class="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-sm bg-emerald-50/40">
+          <p class="text-xs font-medium text-emerald-700">Promised to Pay (PTP)</p>
+          <p id="kpiPromisedToPay" class="text-2xl font-bold text-emerald-700 mt-1">0</p>
+          <p class="text-[11px] text-emerald-600 mt-0.5">Dates logged</p>
+        </div>
+        <div class="bg-white p-3.5 rounded-xl border border-teal-200 shadow-sm bg-teal-50/40">
+          <p class="text-xs font-medium text-teal-700">Payments Verified</p>
+          <p id="kpiPaymentsVerified" class="text-2xl font-bold text-teal-700 mt-1">0</p>
+          <p class="text-[11px] text-teal-600 mt-0.5">Auto-stopped calls</p>
+        </div>
+        <div class="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm bg-amber-50/40">
+          <p class="text-xs font-medium text-amber-700">Requiring Follow-Up</p>
+          <p id="kpiRequiringFollowup" class="text-2xl font-bold text-amber-700 mt-1">0</p>
+          <p class="text-[11px] text-amber-600 mt-0.5">Overdue / Escalated</p>
+        </div>
+        <div class="bg-white p-3.5 rounded-xl border border-rose-200 shadow-sm bg-rose-50/40 col-span-2 sm:col-span-1">
+          <p class="text-xs font-medium text-rose-700">Failed / Callbacks</p>
+          <p id="kpiFailedCallbacks" class="text-2xl font-bold text-rose-700 mt-1">0</p>
+          <p class="text-[11px] text-rose-600 mt-0.5">Guardrail or Busy</p>
+        </div>
+      </div>
+
+      <!-- Prioritized Queue + Recent Call Outcomes -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Left 2 cols: Priority Calling Queue -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-4 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Prioritized EMI Reminder Queue</h3>
+              <p class="text-xs text-slate-500">Ranked by configurable rules (Days Past Due + EMI Amount + Status). Paid & Wrong Number accounts are automatically excluded.</p>
+            </div>
+            <select id="priorityRuleSelect" class="text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 bg-slate-50 font-medium">
+              <option value="score_desc" selected>Rule: Priority Score (Overdue + High Value First)</option>
+              <option value="dpd_desc">Rule: Highest Days Past Due (DPD) First</option>
+              <option value="amount_desc">Rule: Highest Outstanding Amount First</option>
+              <option value="upcoming_first">Rule: Upcoming Pre-Due Reminders First</option>
+            </select>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-[11px] uppercase">
+                  <th class="py-2.5 px-3">Priority</th>
+                  <th class="py-2.5 px-3">Customer & Masked Loan</th>
+                  <th class="py-2.5 px-3 text-right">Outstanding</th>
+                  <th class="py-2.5 px-3">Due / DPD</th>
+                  <th class="py-2.5 px-3">Status</th>
+                  <th class="py-2.5 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="priorityQueueTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right 1 col: Live Activity & Escalation Feed -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+          <div class="px-4 py-3.5 border-b border-slate-200">
+            <h3 class="text-sm font-bold text-slate-900">Recent AI Call Outcomes & Escalations</h3>
+            <p class="text-xs text-slate-500">Real-time log of calls, PTP dates, and human handoffs</p>
+          </div>
+          <div id="recentCallFeed" class="p-4 space-y-3 overflow-y-auto max-h-96 flex-1 text-xs"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: CUSTOMER DATABASE & CSV IMPORT                                  -->
+    <!-- ===================================================================== -->
+    <section id="tab-customers" class="tab-panel hidden space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-slate-900">Authorized Customer Database</h2>
+            <p class="text-xs text-slate-500">Full loan account numbers are automatically masked (<code class="text-emerald-700 font-semibold">LN-XXXX-1234</code>) upon import. Verified paid accounts have collection calls disabled.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <label for="csvFileInput" class="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">
+              <span>📥 Import CSV / Excel (CSV)</span>
+              <input id="csvFileInput" type="file" accept=".csv" class="hidden" />
+            </label>
+            <button id="loadSampleBatchBtn" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-300 transition">
+              + Add 2 Sample Customers
+            </button>
+            <button id="openAddCustomerModalBtn" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition">
+              + New Customer
+            </button>
+          </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-100">
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Search Name, Code, Masked Loan, or Phone</label>
+            <input id="custSearchInput" type="text" placeholder="e.g., Rajesh, LN-XXXX-4821, +919810..." class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Payment Status</label>
+            <select id="custStatusFilter" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 bg-white">
+              <option value="ALL">All Statuses</option>
+              <option value="OVERDUE">OVERDUE</option>
+              <option value="UPCOMING">UPCOMING</option>
+              <option value="PTP_RECORDED">PTP_RECORDED</option>
+              <option value="PAID_VERIFIED">PAID_VERIFIED (Calls Stopped)</option>
+              <option value="HARDSHIP_REVIEW">HARDSHIP_REVIEW</option>
+              <option value="DISPUTE_ESCALATED">DISPUTE_ESCALATED</option>
+              <option value="WRONG_NUMBER">WRONG_NUMBER</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 uppercase mb-1">Branch</label>
+            <select id="custBranchFilter" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 bg-white">
+              <option value="ALL">All Branches</option>
+              <option value="Patna Main">Patna Main</option>
+              <option value="Gaya Branch">Gaya Branch</option>
+              <option value="Muzaffarpur">Muzaffarpur</option>
+              <option value="Bhagalpur">Bhagalpur</option>
+              <option value="Darbhanga">Darbhanga</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Customer Table -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-[11px] uppercase">
+                <th class="py-2.5 px-3">Code / Name</th>
+                <th class="py-2.5 px-3">Authorized Phone</th>
+                <th class="py-2.5 px-3">Masked Loan Ref</th>
+                <th class="py-2.5 px-3">Branch & Officer</th>
+                <th class="py-2.5 px-3">Due Date</th>
+                <th class="py-2.5 px-3 text-right">Outstanding</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customerTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add Customer Inline Drawer/Card (Hidden by default) -->
+      <div id="addCustomerCard" class="hidden bg-white rounded-2xl border border-emerald-300 p-4 sm:p-5 shadow-md space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-900">Add Authorized Customer Record (Auto-Masks Loan Account)</h3>
+          <button id="closeAddCustomerBtn" class="text-xs text-slate-500 hover:text-slate-800 font-bold">✕ Close</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Full Name *</label>
+            <input id="newCustName" type="text" placeholder="e.g., Rameshwar Mahto" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Authorized Phone Number *</label>
+            <input id="newCustPhone" type="text" placeholder="+919810099881" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Raw Loan Account (Will be masked) *</label>
+            <input id="newCustLoan" type="text" placeholder="550091827741" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Due Date *</label>
+            <input id="newCustDue" type="date" value="2026-10-28" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Outstanding Amount (₹) *</label>
+            <input id="newCustAmount" type="number" value="4200" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Branch & Status</label>
+            <select id="newCustStatus" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+              <option value="OVERDUE">OVERDUE (Patna Main)</option>
+              <option value="UPCOMING">UPCOMING (Gaya Branch)</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button id="saveNewCustomerBtn" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold">
+            Save & Mask Loan Account
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: HINDI AI VOICE CALLING CONSOLE & CONVERSATION SIMULATOR         -->
+    <!-- ===================================================================== -->
+    <section id="tab-calling" class="tab-panel hidden space-y-5">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Left 5 Columns: Call Controls, Customer Selector & Guardrail Checklist -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-bold text-slate-900">Outbound Call Controller</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800">
+                hi-IN + en-IN Ready
+              </span>
+            </div>
+
+            <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-amber-900">Quick Dial / Authorized Number Lookup</span>
+                <span class="text-[11px] font-semibold text-amber-700">Simulator Mode (No Live PSTN)</span>
+              </div>
+              <div class="flex gap-2">
+                <input id="directPhoneDialInput" type="text" value="+916201872651" placeholder="Enter 10-digit mobile or +91..." class="flex-1 px-3 py-1.5 rounded-lg border border-amber-300 bg-white font-mono text-xs" />
+                <button id="directPhoneDialBtn" class="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs whitespace-nowrap transition">
+                  Dial in Simulator
+                </button>
+              </div>
+              <p class="text-[11px] text-amber-800">
+                <strong>Transparency Notice:</strong> Real phone calls cannot be placed without paid Twilio/Exotel credentials in <code>.env</code>. Dialing here runs a safe Hindi AI voice simulation for this number.
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">1. Select Authorized Customer to Call</label>
+              <select id="callCustomerSelect" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-xs sm:text-sm font-medium"></select>
+            </div>
+
+            <!-- Selected Customer Summary Card -->
+            <div id="selectedCustomerSummary" class="p-3.5 rounded-xl bg-slate-900 text-white text-xs space-y-1.5"></div>
+
+            <!-- Pre-Call Security & RBI Guardrail Verification -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+              <p class="font-bold text-slate-800">2. Pre-Call Security & RBI Compliance Checks</p>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input id="chkConsentDisclosure" type="checkbox" checked class="rounded text-emerald-600" />
+                <span class="text-slate-700">Announce AI identity & call recording consent notice</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input id="chkVerifyIdentity" type="checkbox" checked class="rounded text-emerald-600" />
+                <span class="text-slate-700">Verify customer identity before disclosing EMI details</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input id="chkEnableTtsAudio" type="checkbox" checked class="rounded text-emerald-600" />
+                <span class="text-slate-700">Speak Hindi AI responses aloud (Browser Web Speech TTS)</span>
+              </label>
+            </div>
+
+            <!-- Call Initiation Buttons -->
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button id="startManualCallBtn" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow transition flex items-center justify-center gap-2">
+                <span>📞 Start Manual AI Call</span>
+              </button>
+              <button id="endActiveCallBtn" class="py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs sm:text-sm shadow transition disabled:opacity-40" disabled>
+                End Call
+              </button>
+            </div>
+          </div>
+
+          <!-- 6 Required Customer Hindi Responses (1-Tap Test Buttons) -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Test Customer Responses (Hindi / Hinglish)</h3>
+              <p class="text-xs text-slate-500">Tap any preset phrase below (or speak/type your own) during or right after starting a call to test AI NLU, PTP date capture, and escalations:</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <button data-phrase="Main aaj payment kar dunga." class="preset-phrase-btn text-left p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 transition">
+                <span class="font-bold text-emerald-900 block">"Main aaj payment kar dunga."</span>
+                <span class="text-[11px] text-emerald-700">→ Records PTP for Today (26 Oct)</span>
+              </button>
+              <button data-phrase="Main 28 October ko payment karunga." class="preset-phrase-btn text-left p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 transition">
+                <span class="font-bold text-emerald-900 block">"Main 28 October ko payment karunga."</span>
+                <span class="text-[11px] text-emerald-700">→ Extracts & logs PTP: 2026-10-28</span>
+              </button>
+              <button data-phrase="Maine payment kar diya hai." class="preset-phrase-btn text-left p-2.5 rounded-xl border border-teal-200 bg-teal-50/60 hover:bg-teal-100 transition">
+                <span class="font-bold text-teal-900 block">"Maine payment kar diya hai."</span>
+                <span class="text-[11px] text-teal-700">→ Queues UTR check; no false claim</span>
+              </button>
+              <button data-phrase="Abhi paise nahi hain." class="preset-phrase-btn text-left p-2.5 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100 transition">
+                <span class="font-bold text-amber-900 block">"Abhi paise nahi hain."</span>
+                <span class="text-[11px] text-amber-700">→ Empathetic reply + Hardship Escalation</span>
+              </button>
+              <button data-phrase="Mujhe baad mein call karna." class="preset-phrase-btn text-left p-2.5 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100 transition">
+                <span class="font-bold text-blue-900 block">"Mujhe baad mein call karna."</span>
+                <span class="text-[11px] text-blue-700">→ Polite callback scheduled</span>
+              </button>
+              <button data-phrase="Galat number hai." class="preset-phrase-btn text-left p-2.5 rounded-xl border border-rose-200 bg-rose-50/60 hover:bg-rose-100 transition">
+                <span class="font-bold text-rose-900 block">"Galat number hai."</span>
+                <span class="text-[11px] text-rose-700">→ Zero debt disclosure + Stop & Escalate</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 7 Columns: Live Hindi AI Conversation Transcript & NLU Inspector -->
+        <div class="lg:col-span-7 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-4 py-3.5 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <span id="callLiveDot" class="w-3 h-3 rounded-full bg-slate-500"></span>
+              <div>
+                <h3 id="callConsoleTitle" class="text-sm font-bold">Hindi AI Voice Transcript & NLU Inspector</h3>
+                <p id="callConsoleSubtitle" class="text-[11px] text-slate-400">Select a customer and tap "Start Manual AI Call" or any Hindi response phrase</p>
+              </div>
+            </div>
+            <button id="replayLastAiVoiceBtn" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-emerald-300 border border-slate-700">
+              🔊 Replay Hindi Audio
+            </button>
+          </div>
+
+          <!-- Conversation Chat Stream -->
+          <div id="callTranscriptContainer" class="flex-1 p-4 space-y-3 overflow-y-auto min-h-[340px] max-h-[440px] bg-slate-50"></div>
+
+          <!-- Custom Input + Mic Speech Recognition Bar -->
+          <div class="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+            <button id="micSpeechBtn" title="Speak in Hindi (Browser Speech Recognition)" class="px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold border border-slate-300">
+              🎙️ Mic (hi-IN)
+            </button>
+            <input id="customUtteranceInput" type="text" placeholder="Type customer reply in Hindi, Hinglish, or English (e.g., Main 28 October ko payment karunga)..." class="flex-1 px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-500" />
+            <button id="sendUtteranceBtn" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold">
+              Send Reply
+            </button>
+          </div>
+
+          <!-- Structured Call Outcome & PTP Extraction Footer -->
+          <div id="nluInspectorBar" class="px-4 py-3 bg-slate-100 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div>
+              <span class="text-slate-500 block text-[11px]">Detected Intent</span>
+              <span id="inspectIntent" class="font-bold text-slate-800">—</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block text-[11px]">Recorded PTP Date</span>
+              <span id="inspectPtpDate" class="font-bold text-emerald-700">—</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block text-[11px]">Call Outcome</span>
+              <span id="inspectOutcome" class="font-bold text-slate-800">—</span>
+            </div>
+            <div>
+              <span class="text-slate-500 block text-[11px]">Officer Escalation</span>
+              <span id="inspectEscalation" class="font-bold text-slate-800">None</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 4: PROMISE TO PAY (PTP) MANAGEMENT & CALLING SCHEDULE              -->
+    <!-- ===================================================================== -->
+    <section id="tab-ptp" class="tab-panel hidden space-y-5">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Left 2 Columns: Recorded PTP Register -->
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-base font-bold text-slate-900">Promise to Pay (PTP) Ledger</h2>
+              <p class="text-xs text-slate-500">Tracks customer reference, call timestamp, verbatim customer response, promised date, promised amount, follow-up status, and call outcome.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-[11px] uppercase">
+                  <th class="py-2.5 px-3">Customer Ref</th>
+                  <th class="py-2.5 px-3">Call Date & Time</th>
+                  <th class="py-2.5 px-3">Customer Response</th>
+                  <th class="py-2.5 px-3">Promised Date</th>
+                  <th class="py-2.5 px-3 text-right">Promised Amt</th>
+                  <th class="py-2.5 px-3">Follow-up Status</th>
+                  <th class="py-2.5 px-3">Action</th>
+                </tr>
+              </thead>
+              <tbody id="ptpTableBody" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Right 1 Column: Configurable Calling Schedule & RBI Rules -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900">Configurable Calling Schedule & Guardrails</h3>
+          <p class="text-xs text-slate-500">Enforces RBI Fair Practices Code & Telecom rules automatically across manual and automated campaigns.</p>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Permitted Start Hour (IST)</label>
+              <input id="cfgStartHour" type="number" min="8" max="12" value="8" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Permitted End Hour (IST)</label>
+              <input id="cfgEndHour" type="number" min="16" max="19" value="19" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Max Call Attempts Per Customer / Day</label>
+              <input id="cfgMaxDaily" type="number" min="1" max="5" value="2" class="w-full px-3 py-2 rounded-lg border border-slate-300" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Auto-Followup Campaign Slot</label>
+              <select id="cfgCampaignSlot" class="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                <option value="10:00 IST Morning Batch">10:00 IST — Morning Pre-Due & Overdue Batch</option>
+                <option value="16:00 IST Afternoon Callback Batch">16:00 IST — Afternoon Callback & PTP Follow-up</option>
+              </select>
+            </div>
+            <button id="saveScheduleConfigBtn" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold transition">
+              Save Calling Schedule Rules
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 5: REPORTING, TOTALS/PERCENTAGES & IMMUTABLE AUDIT LOG             -->
+    <!-- ===================================================================== -->
+    <section id="tab-reports" class="tab-panel hidden space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Collection Reports & Filtered CSV Export</h2>
+            <p class="text-xs text-slate-500">Filter by date, assigned employee, branch, and call outcome with live totals and percentages.</p>
+          </div>
+          <button id="exportFilteredCsvBtn" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow-sm transition">
+            ⬇️ Export Filtered Report to CSV
+          </button>
+        </div>
+
+        <!-- Report Filters -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-100 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Due Date Filter</label>
+            <select id="repDateFilter" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white">
+              <option value="ALL">All Dates (Oct 2026)</option>
+              <option value="OVERDUE_ONLY">On or Before Today (2026-10-26)</option>
+              <option value="UPCOMING_ONLY">Upcoming After 2026-10-26</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Employee</label>
+            <select id="repEmployeeFilter" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white">
+              <option value="ALL">All Employees</option>
+              <option value="Amit Verma">Amit Verma</option>
+              <option value="Priya Singh">Priya Singh</option>
+              <option value="Rohan Das">Rohan Das</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Branch</label>
+            <select id="repBranchFilter" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white">
+              <option value="ALL">All Branches</option>
+              <option value="Patna Main">Patna Main</option>
+              <option value="Gaya Branch">Gaya Branch</option>
+              <option value="Muzaffarpur">Muzaffarpur</option>
+              <option value="Bhagalpur">Bhagalpur</option>
+              <option value="Darbhanga">Darbhanga</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Status / Call Outcome</label>
+            <select id="repOutcomeFilter" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white">
+              <option value="ALL">All Outcomes</option>
+              <option value="PTP_RECORDED">PTP_RECORDED</option>
+              <option value="PAID_VERIFIED">PAID_VERIFIED</option>
+              <option value="OVERDUE">OVERDUE</option>
+              <option value="HARDSHIP_REVIEW">HARDSHIP_REVIEW</option>
+              <option value="WRONG_NUMBER">WRONG_NUMBER</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Totals & Percentages Bar -->
+        <div id="reportMetricsSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-xl bg-slate-900 text-white text-xs"></div>
+
+        <!-- Filtered Report Table -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-[11px] uppercase">
+                <th class="py-2 px-3">Customer</th>
+                <th class="py-2 px-3">Masked Loan</th>
+                <th class="py-2 px-3">Branch</th>
+                <th class="py-2 px-3">Officer</th>
+                <th class="py-2 px-3">Due Date</th>
+                <th class="py-2 px-3 text-right">EMI (₹)</th>
+                <th class="py-2 px-3 text-right">Outstanding (₹)</th>
+                <th class="py-2 px-3">Status</th>
+              </tr>
+            </thead>
+            <tbody id="reportPreviewTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Immutable Audit Log -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Immutable Compliance Audit Log</h3>
+            <p class="text-xs text-slate-500">Every call attempt, PTP entry, payment verification, CSV import, and guardrail block is recorded with user role and timestamp.</p>
+          </div>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-slate-200 max-h-80">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 text-[11px] uppercase">
+                <th class="py-2 px-3">Timestamp (IST)</th>
+                <th class="py-2 px-3">Actor & Role</th>
+                <th class="py-2 px-3">Action</th>
+                <th class="py-2 px-3">Target Ref</th>
+                <th class="py-2 px-3">Audit Details</th>
+              </tr>
+            </thead>
+            <tbody id="auditLogTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 6: ARCHITECTURE, BACKEND SOURCE CODE, COST MATRIX & ANDROID GUIDE  -->
+    <!-- ===================================================================== -->
+    <section id="tab-architecture" class="tab-panel hidden space-y-5">
+      <!-- Cost & Free vs Paid Transparency Matrix -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3">
+        <h2 class="text-base font-bold text-slate-900">Cost Breakdown: Free Open-Source vs. Paid Production Services</h2>
+        <p class="text-xs text-slate-600">
+          <strong>Important Honesty Note:</strong> Real outbound phone calls to Indian mobile numbers <strong>cannot</strong> be made without a paid telephony provider (such as Exotel or Twilio) and telecom KYC registration. Everything else—the dashboard, database, PTP workflow, CSV reporting, and in-browser Hindi AI Voice Simulator—runs <strong>100% free</strong>.
+        </p>
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
+                <th class="py-2.5 px-3">System Module</th>
+                <th class="py-2.5 px-3">Runs 100% Free (Included Now)</th>
+                <th class="py-2.5 px-3">Paid Service Required For Live PSTN</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="py-2 px-3 font-semibold">Dashboard, CRM, PTP & Audit Log</td>
+                <td class="py-2 px-3 text-emerald-700 font-medium">FREE — Runs in mobile/desktop browser & FastAPI</td>
+                <td class="py-2 px-3 text-slate-600">Optional cloud hosting ($0 free tier on Render or ~₹400/mo VPS)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-3 font-semibold">Database (SQLite / PostgreSQL)</td>
+                <td class="py-2 px-3 text-emerald-700 font-medium">FREE — Built-in SQLite + Neon/Supabase free Postgres</td>
+                <td class="py-2 px-3 text-slate-600">Managed high-availability PostgreSQL (~$15/mo at scale)</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-3 font-semibold">Hindi Speech (TTS & STT)</td>
+                <td class="py-2 px-3 text-emerald-700 font-medium">FREE — Browser Web Speech API (`hi-IN` & `en-IN`)</td>
+                <td class="py-2 px-3 text-slate-600">Sarvam AI / Google Cloud TTS & STT when streaming over phone lines</td>
+              </tr>
+              <tr>
+                <td class="py-2 px-3 font-semibold">Outbound Phone Calling (PSTN)</td>
+                <td class="py-2 px-3 text-amber-700 font-medium">Safe Hindi Simulator only (No real phone call dialed)</td>
+                <td class="py-2 px-3 text-rose-700 font-semibold">REQUIRED: Exotel (India 140-prefix) or Twilio (~₹0.75–₹1.50/min)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Android Mobile GitHub & Safe Telephony Testing Guide -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-2.5 text-xs">
+          <h3 class="text-sm font-bold text-slate-900">📱 Android Phone GitHub & Deployment Guide (No PC Needed)</h3>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-700">
+            <li><strong>Download Project Zip:</strong> Save <code class="text-emerald-700 font-semibold">ai-loan-collection-agent.zip</code> on your Android phone and extract it using the built-in Android Files app.</li>
+            <li><strong>Upload to GitHub on Android:</strong> Open Chrome or the <strong>GitHub Mobile App</strong> on Android, create a <strong>Private Repository</strong> named <code>ai-loan-collection-agent</code>, tap <strong>Add file → Upload files</strong>, and commit the extracted folders (never upload a real <code>.env</code> file).</li>
+            <li><strong>Deploy Backend from Mobile Browser:</strong> Sign in to <strong>Render.com</strong> or <strong>Railway.app</strong> on Android Chrome, connect your GitHub repo, set start command <code>uvicorn backend.main:app --host 0.0.0.0 --port $PORT</code>, and paste your environment variables from <code>.env.example</code>.</li>
+            <li><strong>Add Dashboard to Android Home Screen:</strong> Open the deployed URL in Chrome on Android and tap <strong>Menu (⋮) → Add to Home screen</strong> for 1-tap mobile access.</li>
+          </ol>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-2.5 text-xs">
+          <h3 class="text-sm font-bold text-slate-900">🔒 Safe Telephony Configuration & Testing Protocol</h3>
+          <ol class="list-decimal list-inside space-y-1.5 text-slate-700">
+            <li><strong>Step 1 (Sandbox Verification):</strong> Keep <code>TELEPHONY_PROVIDER="simulator"</code> in <code>.env</code> and verify all 6 Hindi intents, PTP dates, and RBI hour blocks in the dashboard first.</li>
+            <li><strong>Step 2 (Whitelist Only Your Own Phone):</strong> Register with <strong>Exotel</strong> (India TRAI compliant) or <strong>Twilio</strong>, and add <strong>only your own personal phone number</strong> as a verified test recipient.</li>
+            <li><strong>Step 3 (Configure Webhooks):</strong> Set <code>PUBLIC_WEBHOOK_BASE_URL</code> to your HTTPS backend domain so Twilio/Exotel can reach <code>/api/telephony/twilio/twiml</code> and <code>/api/telephony/twilio/gather</code>.</li>
+            <li><strong>Step 4 (Audit Check):</strong> Confirm that the AI asks for identity confirmation first before reading out the masked loan number and EMI amount.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Interactive Backend Code & File Explorer -->
+      <div class="bg-slate-900 text-slate-100 rounded-2xl border border-slate-800 p-4 sm:p-5 shadow-sm space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold text-white">Complete Project Source Files Inspector</h3>
+            <p class="text-xs text-slate-400">Inspect key backend files included in <code class="text-emerald-300">ai-loan-collection-agent.zip</code></p>
+          </div>
+          <div class="flex flex-wrap gap-1.5 text-xs">
+            <button data-codefile="env" class="code-tab-btn px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium">.env.example</button>
+            <button data-codefile="schema" class="code-tab-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium">database/schema.sql</button>
+            <button data-codefile="nlu" class="code-tab-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium">backend/hindi_conversation_engine.py</button>
+            <button data-codefile="telephony" class="code-tab-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium">backend/telephony_service.py</button>
+          </div>
+        </div>
+        <pre id="codePreviewBox" class="p-4 rounded-xl bg-slate-950 text-emerald-300 text-xs overflow-x-auto max-h-96 leading-relaxed font-mono"></pre>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // =========================================================================
+    // COMPLETE IN-BROWSER STATE & HINDI AI CONVERSATION ENGINE
+    // =========================================================================
+    const APP_STATE = {
+      currentRole: "supervisor",
+      currentUser: "Priya Singh",
+      simulatedHourIST: 11,
+      permittedStartHour: 8,
+      permittedEndHour: 19,
+      maxCallsPerDay: 2,
+      selectedCustomerId: 9,
+      activeCallSession: false,
+      lastAiHindiSpeech: "",
+      prioritySortRule: "score_desc",
+      customers: [
+        {
+          id: 1,
+          customer_code: "CUST-1001",
+          full_name: "Rajesh Kumar Sharma",
+          phone_number: "+919810011001",
+          loan_account_masked: "LN-XXXX-4821",
+          branch: "Patna Main",
+          assigned_employee: "Amit Verma",
+          preferred_language: "hi-IN",
+          emi_amount: 4500,
+          outstanding_amount: 4500,
+          due_date: "2026-10-20",
+          days_past_due: 6,
+          payment_status: "OVERDUE",
+          priority_score: 82,
+          calls_today: 0,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "Two-wheeler loan installment overdue"
+        },
+        {
+          id: 2,
+          customer_code: "CUST-1002",
+          full_name: "Sunita Devi",
+          phone_number: "+919810011002",
+          loan_account_masked: "LN-XXXX-7390",
+          branch: "Gaya Branch",
+          assigned_employee: "Priya Singh",
+          preferred_language: "hi-IN",
+          emi_amount: 3200,
+          outstanding_amount: 3200,
+          due_date: "2026-10-22",
+          days_past_due: 4,
+          payment_status: "OVERDUE",
+          priority_score: 78,
+          calls_today: 0,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "MSME micro-enterprise installment"
+        },
+        {
+          id: 3,
+          customer_code: "CUST-1003",
+          full_name: "Vikramaditya Singh",
+          phone_number: "+919810011003",
+          loan_account_masked: "LN-XXXX-1154",
+          branch: "Muzaffarpur",
+          assigned_employee: "Amit Verma",
+          preferred_language: "hi-IN",
+          emi_amount: 8750,
+          outstanding_amount: 8750,
+          due_date: "2026-10-28",
+          days_past_due: 0,
+          payment_status: "UPCOMING",
+          priority_score: 60,
+          calls_today: 0,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "Upcoming EMI reminder due on 28 Oct"
+        },
+        {
+          id: 4,
+          customer_code: "CUST-1004",
+          full_name: "Meena Kumari",
+          phone_number: "+919810011004",
+          loan_account_masked: "LN-XXXX-9042",
+          branch: "Patna Main",
+          assigned_employee: "Priya Singh",
+          preferred_language: "hi-IN",
+          emi_amount: 5100,
+          outstanding_amount: 5100,
+          due_date: "2026-10-18",
+          days_past_due: 8,
+          payment_status: "PTP_RECORDED",
+          priority_score: 65,
+          calls_today: 1,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "Promised payment on 28 October"
+        },
+        {
+          id: 5,
+          customer_code: "CUST-1005",
+          full_name: "Anil Prasad Yadav",
+          phone_number: "+919810011005",
+          loan_account_masked: "LN-XXXX-6631",
+          branch: "Bhagalpur",
+          assigned_employee: "Rohan Das",
+          preferred_language: "hi-IN",
+          emi_amount: 6400,
+          outstanding_amount: 0,
+          due_date: "2026-10-15",
+          days_past_due: 0,
+          payment_status: "PAID_VERIFIED",
+          priority_score: 0,
+          calls_today: 0,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "UPI payment verified in core banking; reminders stopped"
+        },
+        {
+          id: 6,
+          customer_code: "CUST-1006",
+          full_name: "Farhan Akhtar Siddiqui",
+          phone_number: "+919810011006",
+          loan_account_masked: "LN-XXXX-3319",
+          branch: "Darbhanga",
+          assigned_employee: "Rohan Das",
+          preferred_language: "hi-IN",
+          emi_amount: 7200,
+          outstanding_amount: 14400,
+          due_date: "2026-10-05",
+          days_past_due: 21,
+          payment_status: "HARDSHIP_REVIEW",
+          priority_score: 35,
+          calls_today: 1,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "Reported temporary medical hardship; escalated to officer"
+        },
+        {
+          id: 7,
+          customer_code: "CUST-1007",
+          full_name: "Kavita Mishra",
+          phone_number: "+919810011007",
+          loan_account_masked: "LN-XXXX-5582",
+          branch: "Patna Main",
+          assigned_employee: "Amit Verma",
+          preferred_language: "en-IN",
+          emi_amount: 9500,
+          outstanding_amount: 9500,
+          due_date: "2026-10-27",
+          days_past_due: 0,
+          payment_status: "UPCOMING",
+          priority_score: 62,
+          calls_today: 0,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "Prefers bilingual Hindi/English reminder"
+        },
+        {
+          id: 8,
+          customer_code: "CUST-1008",
+          full_name: "Deepak Paswan",
+          phone_number: "+919810011008",
+          loan_account_masked: "LN-XXXX-2208",
+          branch: "Gaya Branch",
+          assigned_employee: "Priya Singh",
+          preferred_language: "hi-IN",
+          emi_amount: 2850,
+          outstanding_amount: 2850,
+          due_date: "2026-10-19",
+          days_past_due: 7,
+          payment_status: "OVERDUE",
+          priority_score: 80,
+          calls_today: 0,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "Overdue installment; high priority"
+        },
+        {
+          id: 9,
+          customer_code: "CUST-1009",
+          full_name: "Authorized Customer (6201872651)",
+          phone_number: "+916201872651",
+          loan_account_masked: "LN-XXXX-2651",
+          branch: "Patna Main",
+          assigned_employee: "Priya Singh",
+          preferred_language: "hi-IN",
+          emi_amount: 4800,
+          outstanding_amount: 4800,
+          due_date: "2026-10-25",
+          days_past_due: 1,
+          payment_status: "OVERDUE",
+          priority_score: 85,
+          calls_today: 0,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "Manual call requested for +916201872651 (Safe Simulator active; real PSTN requires paid Twilio/Exotel credentials)"
+        }
+      ],
+      callLogs: [
+        {
+          call_reference: "CALL-SEED-101",
+          customer_id: 4,
+          customer_code: "CUST-1004",
+          customer_name: "Meena Kumari",
+          timestamp: "2026-10-26 09:40 IST",
+          initiated_by: "Priya Singh",
+          utterance: "Main 28 October ko payment karunga.",
+          ai_reply: "बहुत धन्यवाद मीना कुमारी जी! हमने आपके ऋण खाता LN-XXXX-9042 के लिए दिनांक 2026-10-28 को ₹5,100 के भुगतान की प्रतिबद्धता (PTP) दर्ज कर ली है।",
+          intent: "PTP_COMMITMENT_DATE",
+          outcome: "ANSWERED_PTP_FUTURE",
+          escalated: false
+        },
+        {
+          call_reference: "CALL-SEED-102",
+          customer_id: 6,
+          customer_code: "CUST-1006",
+          customer_name: "Farhan Akhtar Siddiqui",
+          timestamp: "2026-10-26 10:05 IST",
+          initiated_by: "Rohan Das",
+          utterance: "Abhi paise nahi hain.",
+          ai_reply: "हम आपकी परिस्थिति को समझते हैं फरहान जी। मैंने आपकी स्थिति का विवरण दर्ज कर लिया है और इसे हमारे अधिकृत अधिकारी (Rohan Das) को भेज दिया है।",
+          intent: "FINANCIAL_HARDSHIP",
+          outcome: "ANSWERED_HARDSHIP_ESCALATED",
+          escalated: true
+        }
+      ],
+      ptpList: [
+        {
+          ptp_reference: "PTP-2026-901",
+          customer_id: 4,
+          customer_code: "CUST-1004",
+          customer_name: "Meena Kumari",
+          loan_account_masked: "LN-XXXX-9042",
+          call_datetime: "2026-10-26 09:40 IST",
+          customer_response: "Main 28 October ko payment karunga.",
+          promised_date: "2026-10-28",
+          promised_amount: 5100,
+          followup_status: "PENDING_VERIFICATION",
+          call_outcome: "ANSWERED_PTP_FUTURE"
+        }
+      ],
+      auditLogs: [
+        {
+          timestamp: "2026-10-26 08:00:05",
+          actor: "SYSTEM_INIT (admin)",
+          action: "SEED_CUSTOMER_DB",
+          target: "BATCH-OCT-2026",
+          details: "Loaded 8 customer records with masked loan account numbers (LN-XXXX-####) and RBI guardrails."
+        },
+        {
+          timestamp: "2026-10-26 09:40:22",
+          actor: "Priya Singh (supervisor)",
+          action: "PTP_RECORDED",
+          target: "CUST-1004",
+          details: "Recorded Promise to Pay for 2026-10-28 (₹5,100) from Hindi voice call."
+        },
+        {
+          timestamp: "2026-10-26 10:05:49",
+          actor: "Rohan Das (collection_agent)",
+          action: "HARDSHIP_ESCALATION",
+          target: "CUST-1006",
+          details: "Customer said 'Abhi paise nahi hain'. Automated calls paused and escalated to officer."
+        }
+      ]
+    };
+
+    const CODE_SNIPPETS = {
+      env: `# .env.example — Copy to .env and never commit real secrets to GitHub
+APP_NAME="AI Loan Collection Agent"
+LENDER_NAME="Bharat Samriddhi Finance Ltd."
+DATABASE_URL="sqlite:///./loan_collection.db"
+
+# RBI & Telecom Compliance Guardrails
+PERMITTED_CALL_START_HOUR=8
+PERMITTED_CALL_END_HOUR=19
+MAX_CALL_ATTEMPTS_PER_DAY=2
+REQUIRE_RECORDING_CONSENT=true
+
+# Telephony Provider ("simulator", "twilio", or "exotel")
+# Real phone calls require a paid/verified Twilio or Exotel account
+TELEPHONY_PROVIDER="simulator"
+TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+TWILIO_AUTH_TOKEN="your_twilio_auth_token_here"
+TWILIO_CALLER_ID="+918000000000"
+EXOTEL_SID="your_exotel_sid"
+EXOTEL_API_KEY="your_exotel_api_key"
+EXOTEL_API_TOKEN="your_exotel_api_token"`,
+
+      schema: `-- database/schema.sql (SQLite & PostgreSQL compatible)
+CREATE TABLE IF NOT EXISTS customers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_code VARCHAR(32) UNIQUE NOT NULL,
+    full_name VARCHAR(120) NOT NULL,
+    phone_number VARCHAR(20) NOT NULL,
+    loan_account_masked VARCHAR(32) NOT NULL,
+    loan_account_encrypted TEXT NOT NULL,
+    branch VARCHAR(64) NOT NULL,
+    assigned_employee VARCHAR(64) NOT NULL,
+    emi_amount NUMERIC(12, 2) NOT NULL,
+    outstanding_amount NUMERIC(12, 2) NOT NULL,
+    due_date DATE NOT NULL,
+    days_past_due INTEGER DEFAULT 0,
+    payment_status VARCHAR(32) NOT NULL,
+    priority_score INTEGER DEFAULT 50,
+    calls_today INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS ptp_commitments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ptp_reference VARCHAR(40) UNIQUE NOT NULL,
+    customer_id INTEGER NOT NULL REFERENCES customers(id),
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    customer_response TEXT NOT NULL,
+    promised_date DATE NOT NULL,
+    promised_amount NUMERIC(12, 2) NOT NULL,
+    followup_status VARCHAR(32) NOT NULL,
+    call_outcome VARCHAR(40) NOT NULL
+);`,
+
+      nlu: `# backend/hindi_conversation_engine.py
+def analyze_customer_utterance(utterance: str, customer: dict) -> dict:
+    text = utterance.lower().strip()
+    name = customer["full_name"]
+    masked = customer["loan_account_masked"]
+    amt = f"₹{float(customer['outstanding_amount']):,.0f}"
+
+    if "galat number" in text or "wrong number" in text:
+        return {
+            "intent": "WRONG_NUMBER_ESCALATION",
+            "call_outcome": "ANSWERED_WRONG_NUMBER_STOPPED",
+            "new_payment_status": "WRONG_NUMBER",
+            "escalate_to_human": True,
+            "ai_reply_hindi": "क्षमा करें, हम कोई खाता विवरण साझा नहीं करेंगे और इस नंबर को सत्यापन के लिए चिह्नित कर रहे हैं।"
+        }
+    if "payment kar diya" in text or "paid" in text:
+        return {
+            "intent": "ALREADY_PAID_CLAIM",
+            "call_outcome": "ANSWERED_ALREADY_PAID",
+            "followup_status": "PENDING_VERIFICATION",
+            "escalate_to_human": True,
+            "ai_reply_hindi": f"धन्यवाद {name} जी। हमारे अधिकारी बैंक रिकॉर्ड (UTR) से इसका सत्यापन करेंगे और रिमाइंडर बंद कर देंगे।"
+        }
+    # Handles "Main aaj payment kar dunga", "Main 28 October ko payment karunga",
+    # "Abhi paise nahi hain", and "Mujhe baad mein call karna" with polite Hindi replies.`,
+
+      telephony: `# backend/telephony_service.py
+class TelephonyIntegrationService:
+    def initiate_outbound_call(self, customer: dict, initiated_by: str, current_hour_ist: int):
+        # 1. Verify RBI calling hours (08:00 - 19:00 IST) & PAID_VERIFIED lock
+        ok, msg = verify_compliance_before_call(customer, current_hour_ist)
+        if not ok:
+            return {"success": False, "status": "BLOCKED_COMPLIANCE_GUARDRAIL", "message": msg}
+
+        # 2. Dispatch to Twilio / Exotel if configured, otherwise run safe simulator
+        if self.provider == "twilio":
+            return self._place_twilio_call(customer, initiated_by)
+        elif self.provider == "exotel":
+            return self._place_exotel_call(customer, initiated_by)
+        return {"success": True, "mode": "simulator", "real_pstn_call": False}`
+    };
+
+    // =========================================================================
+    // HELPER FUNCTIONS: MASKING, TOAST, SPEECH SYNTHESIS, AUDIT LOGGING
+    // =========================================================================
+    function maskLoanAccount(raw) {
+      const clean = String(raw || "").replace(/[^a-zA-Z0-9]/g, "");
+      const last4 = clean.slice(-4).padStart(4, "0");
+      return "LN-XXXX-" + last4;
+    }
+
+    function formatPhoneForRole(phone) {
+      if (APP_STATE.currentRole === "auditor") {
+        return phone.slice(0, 3) + "******" + phone.slice(-4);
+      }
+      return phone;
+    }
+
+    function showToast(title, desc, isError = false) {
+      const banner = document.getElementById("toastBanner");
+      const icon = document.getElementById("toastIcon");
+      document.getElementById("toastTitle").textContent = title;
+      document.getElementById("toastDesc").textContent = desc;
+      icon.textContent = isError ? "⚠️" : "✓";
+      icon.className = isError ? "text-rose-400 font-bold text-base" : "text-emerald-400 font-bold text-base";
+      banner.classList.remove("hidden");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => banner.classList.add("hidden"), 4500);
+    }
+
+    function addAuditEntry(action, target, details) {
+      const nowStr = "2026-10-26 " + String(APP_STATE.simulatedHourIST).padStart(2, "0") + ":" +
+        String(new Date().getMinutes()).padStart(2, "0") + ":" +
+        String(new Date().getSeconds()).padStart(2, "0");
+      APP_STATE.auditLogs.unshift({
+        timestamp: nowStr,
+        actor: `${APP_STATE.currentUser} (${APP_STATE.currentRole})`,
+        action,
+        target,
+        details
+      });
+    }
+
+    function speakHindiText(text) {
+      APP_STATE.lastAiHindiSpeech = text;
+      const enabled = document.getElementById("chkEnableTtsAudio").checked;
+      if (!enabled || !("speechSynthesis" in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "hi-IN";
+        utter.rate = 0.98;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {
+        // Ignore speech synthesis errors in restricted iframes
+      }
+    }
+
+    function statusBadgeHtml(status) {
+      const map = {
+        OVERDUE: "bg-rose-100 text-rose-800 border-rose-200",
+        UPCOMING: "bg-blue-100 text-blue-800 border-blue-200",
+        PTP_RECORDED: "bg-emerald-100 text-emerald-800 border-emerald-200",
+        PAID_VERIFIED: "bg-teal-100 text-teal-800 border-teal-200",
+        HARDSHIP_REVIEW: "bg-amber-100 text-amber-800 border-amber-200",
+        DISPUTE_ESCALATED: "bg-purple-100 text-purple-800 border-purple-200",
+        WRONG_NUMBER: "bg-slate-200 text-slate-700 border-slate-300"
+      };
+      const cls = map[status] || "bg-slate-100 text-slate-800";
+      return `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${cls}">${status}</span>`;
+    }
+
+    // =========================================================================
+    // COMPLIANCE GUARDRAIL CHECKER
+    // =========================================================================
+    function checkGuardrailsForCustomer(customer) {
+      if (customer.payment_status === "PAID_VERIFIED" || customer.outstanding_amount <= 0) {
+        return { allowed: false, reason: "BLOCKED: Payment is verified as PAID. Collection reminders are stopped." };
+      }
+      if (customer.payment_status === "WRONG_NUMBER") {
+        return { allowed: false, reason: "BLOCKED: Flagged as Wrong Number / Identity Mismatch. Escalated for manual check." };
+      }
+      if (
+        APP_STATE.simulatedHourIST < APP_STATE.permittedStartHour ||
+        APP_STATE.simulatedHourIST >= APP_STATE.permittedEndHour
+      ) {
+        return {
+          allowed: false,
+          reason: `BLOCKED: Simulated IST hour (${APP_STATE.simulatedHourIST}:00) is outside RBI permitted calling hours (${APP_STATE.permittedStartHour}:00–${APP_STATE.permittedEndHour}:00 IST).`
+        };
+      }
+      if (customer.calls_today >= APP_STATE.maxCallsPerDay) {
+        return {
+          allowed: false,
+          reason: `BLOCKED: Daily contact frequency limit (${APP_STATE.maxCallsPerDay} calls/day) reached for ${customer.customer_code}.`
+        };
+      }
+      return { allowed: true, reason: "COMPLIANT" };
+    }
+
+    // =========================================================================
+    // HINDI CONVERSATION NLU & RESPONSE ENGINE (IN-BROWSER MIRROR)
+    // =========================================================================
+    function evaluateCustomerHindiResponse(utterance, customer) {
+      const text = utterance.toLowerCase().trim();
+      const name = customer.full_name;
+      const masked = customer.loan_account_masked;
+      const amtStr = "₹" + Number(customer.outstanding_amount).toLocaleString("en-IN");
+
+      // 1. "Galat number hai."
+      if (text.includes("galat number") || text.includes("wrong number") || text.includes("गलत नंबर")) {
+        return {
+          intent: "WRONG_NUMBER_ESCALATION",
+          outcome: "ANSWERED_WRONG_NUMBER_STOPPED",
+          newStatus: "WRONG_NUMBER",
+          ptpDate: null,
+          followupStatus: "ESCALATED_IDENTITY_MISMATCH",
+          escalate: true,
+          escalationNote: `Escalated to ${customer.assigned_employee} (Identity mismatch / Wrong number)`,
+          hindiReply: `क्षमा करें, आपको हुई असुविधा के लिए हमें खेद है। हम आपके साथ कोई भी ऋण विवरण साझा नहीं करेंगे और इस नंबर को तुरंत हमारे अधिकृत अधिकारी (${customer.assigned_employee}) द्वारा सत्यापन के लिए चिह्नित कर रहे हैं। नमस्ते।`,
+          hinglishReply: `Kshama karein, hum koi bhi loan jankari share nahi karenge aur is number ko verification ke liye mark kar rahe hain. Namaste.`
+        };
+      }
+
+      // 2. "Maine payment kar diya hai."
+      if (text.includes("payment kar diya") || text.includes("paid") || text.includes("bhar diya") || text.includes("पेमेंट कर दिया")) {
+        return {
+          intent: "ALREADY_PAID_CLAIM",
+          outcome: "ANSWERED_ALREADY_PAID",
+          newStatus: customer.payment_status,
+          ptpDate: "2026-10-26",
+          followupStatus: "PENDING_VERIFICATION",
+          escalate: true,
+          escalationNote: `Queued for UTR reconciliation by ${customer.assigned_employee}`,
+          hindiReply: `भुगतान की जानकारी देने के लिए बहुत धन्यवाद ${name} जी। हमने खाता ${masked} के लिए आपकी भुगतान सूचना दर्ज कर ली है। हमारे अधिकृत अधिकारी बैंक रिकॉर्ड (UTR) से इसका सत्यापन करेंगे, और सत्यापन होते ही रिमाइंडर कॉल बंद हो जाएंगी। नमस्ते!`,
+          hinglishReply: `Payment ki jankari dene ke liye dhanyavaad ${name} ji. Hamare officer bank UTR record se verify karenge aur verify hote hi calls band ho jayengi.`
+        };
+      }
+
+      // 3. "Abhi paise nahi hain."
+      if (text.includes("paise nahi") || text.includes("paisa nahi") || text.includes("पैसे नहीं") || text.includes("hardship") || text.includes("dikkat")) {
+        return {
+          intent: "FINANCIAL_HARDSHIP",
+          outcome: "ANSWERED_HARDSHIP_ESCALATED",
+          newStatus: "HARDSHIP_REVIEW",
+          ptpDate: null,
+          followupStatus: "ESCALATED_HARDSHIP_OFFICER",
+          escalate: true,
+          escalationNote: `Hardship support assigned to ${customer.assigned_employee}`,
+          hindiReply: `हम आपकी परिस्थिति को समझते हैं ${name} जी। चिंता न करें, मैंने आपकी स्थिति का विवरण दर्ज कर लिया है और इसे हमारे अधिकृत ग्राहक सहायता अधिकारी (${customer.assigned_employee}) को भेज दिया है ताकि वे आपको भुगतान के आसान विकल्प में सहायता दे सकें। धन्यवाद।`,
+          hinglishReply: `Hum aapki paristhiti ko samajhte hain ${name} ji. Maine aapka case hamare authorized officer (${customer.assigned_employee}) ko escalate kar diya hai.`
+        };
+      }
+
+      // 4. "Mujhe baad mein call karna."
+      if (text.includes("baad mein") || text.includes("call later") || text.includes("busy") || text.includes("बाद में कॉल")) {
+        return {
+          intent: "CALLBACK_REQUESTED",
+          outcome: "ANSWERED_CALLBACK_SCHEDULED",
+          newStatus: customer.payment_status,
+          ptpDate: null,
+          followupStatus: "CALLBACK_SCHEDULED",
+          escalate: false,
+          escalationNote: "None (Callback scheduled at 16:00 IST)",
+          hindiReply: `जी बिल्कुल ${name} जी, हम आपके समय का सम्मान करते हैं। हमने आपके अनुरोध के अनुसार अनुमत कॉलिंग समय (सुबह 8 बजे से शाम 7 बजे के बीच) में कॉलबैक शेड्यूल कर लिया है। धन्यवाद, नमस्ते।`,
+          hinglishReply: `Ji bilkul ${name} ji, humne aapke request ke anusaar permitted hours mein callback schedule kar liya hai. Dhanyavaad.`
+        };
+      }
+
+      // 5. "Main aaj payment kar dunga."
+      if (text.includes("aaj") || text.includes("today") || text.includes("आज")) {
+        return {
+          intent: "PTP_COMMITMENT_TODAY",
+          outcome: "ANSWERED_PTP_TODAY",
+          newStatus: "PTP_RECORDED",
+          ptpDate: "2026-10-26",
+          followupStatus: "PENDING_VERIFICATION",
+          escalate: false,
+          escalationNote: "None",
+          hindiReply: `बहुत धन्यवाद ${name} जी! हमने आपके ऋण खाता ${masked} के लिए आज (2026-10-26) को ${amtStr} के भुगतान की प्रतिबद्धता (Promise to Pay) दर्ज कर ली है। आपका दिन शुभ हो, नमस्ते!`,
+          hinglishReply: `Bahut dhanyavaad ${name} ji! Humne aaj (2026-10-26) ke liye ${amtStr} ka Promise to Pay (PTP) record kar liya hai.`
+        };
+      }
+
+      // 6. Specific date like "Main 28 October ko payment karunga."
+      const dayMatch = text.match(/(\b\d{1,2})\s*(?:oct|अक्टूबर|october|nov|november)/i);
+      if (dayMatch || text.includes("karunga") || text.includes("kar dunga") || text.includes("करूँगा")) {
+        const dayNum = dayMatch ? String(dayMatch[1]).padStart(2, "0") : "28";
+        const ptpDate = `2026-10-${dayNum}`;
+        return {
+          intent: "PTP_COMMITMENT_DATE",
+          outcome: "ANSWERED_PTP_FUTURE",
+          newStatus: "PTP_RECORDED",
+          ptpDate,
+          followupStatus: "PENDING_VERIFICATION",
+          escalate: false,
+          escalationNote: "None",
+          hindiReply: `बहुत धन्यवाद ${name} जी! हमने आपके ऋण खाता ${masked} के लिए दिनांक ${ptpDate} को ${amtStr} के भुगतान की प्रतिबद्धता (Promise to Pay) दर्ज कर ली है। आपका दिन शुभ हो, नमस्ते!`,
+          hinglishReply: `Bahut dhanyavaad ${name} ji! Humne aapke loan account ${masked} ke liye date ${ptpDate} ko ${amtStr} ka PTP record kar liya hai.`
+        };
+      }
+
+      // Fallback polite clarification
+      return {
+        intent: "CLARIFICATION_REQUESTED",
+        outcome: "ANSWERED_CALLBACK_SCHEDULED",
+        newStatus: customer.payment_status,
+        ptpDate: null,
+        followupStatus: "NEEDS_FOLLOWUP",
+        escalate: false,
+        escalationNote: "None",
+        hindiReply: `धन्यवाद ${name} जी। आपके ऋण खाता ${masked} की देय राशि ${amtStr} है। कृपया बताएं कि आप यह भुगतान आज करेंगे या किसी निश्चित तारीख (जैसे 28 अक्टूबर) को?`,
+        hinglishReply: `Dhanyavaad ${name} ji. Kripya batayein aap ${amtStr} ka payment aaj karenge ya kisi specific date ko?`
+      };
+    }
+
+    // =========================================================================
+    // RENDER FUNCTIONS FOR ALL TABS
+    // =========================================================================
+    function renderAll() {
+      renderKPIs();
+      renderPriorityQueue();
+      renderRecentCallFeed();
+      renderCustomerDatabase();
+      renderCallControllerCustomerSelect();
+      renderPtpTable();
+      renderReportsAndAudit();
+    }
+
+    function renderKPIs() {
+      const total = APP_STATE.customers.length;
+      const attempted = APP_STATE.callLogs.length;
+      const answered = APP_STATE.callLogs.filter(c => c.outcome.startsWith("ANSWERED_")).length;
+      const ptpCount = APP_STATE.customers.filter(c => c.payment_status === "PTP_RECORDED").length;
+      const paidCount = APP_STATE.customers.filter(c => c.payment_status === "PAID_VERIFIED").length;
+      const followupCount = APP_STATE.customers.filter(c =>
+        ["OVERDUE", "HARDSHIP_REVIEW", "DISPUTE_ESCALATED"].includes(c.payment_status)
+      ).length;
+      const failedOrCb = APP_STATE.callLogs.filter(c =>
+        ["NO_ANSWER", "BLOCKED_COMPLIANCE_GUARDRAIL", "ANSWERED_CALLBACK_SCHEDULED"].includes(c.outcome)
+      ).length;
+      const rate = attempted > 0 ? Math.round((answered / attempted) * 100) : 0;
+
+      document.getElementById("kpiTotalCustomers").textContent = total;
+      document.getElementById("kpiCallsAttempted").textContent = attempted;
+      document.getElementById("kpiCallsAnswered").textContent = answered;
+      document.getElementById("kpiAnswerRate").textContent = `${rate}% answer rate`;
+      document.getElementById("kpiPromisedToPay").textContent = ptpCount;
+      document.getElementById("kpiPaymentsVerified").textContent = paidCount;
+      document.getElementById("kpiRequiringFollowup").textContent = followupCount;
+      document.getElementById("kpiFailedCallbacks").textContent = failedOrCb;
+
+      const winOk = APP_STATE.simulatedHourIST >= APP_STATE.permittedStartHour &&
+                    APP_STATE.simulatedHourIST < APP_STATE.permittedEndHour;
+      const winBadge = document.getElementById("windowStatusBadge");
+      winBadge.textContent = winOk
+        ? `Window Active (${APP_STATE.permittedStartHour}:00–${APP_STATE.permittedEndHour}:00 IST)`
+        : `OUTSIDE PERMITTED HOURS (${APP_STATE.simulatedHourIST}:00 IST — Calls Blocked)`;
+      winBadge.className = winOk ? "text-emerald-400" : "text-rose-400 font-bold";
+    }
+
+    function renderPriorityQueue() {
+      const tbody = document.getElementById("priorityQueueTableBody");
+      let activeList = APP_STATE.customers.filter(c =>
+        !["PAID_VERIFIED", "WRONG_NUMBER"].includes(c.payment_status)
+      );
+
+      const rule = APP_STATE.prioritySortRule;
+      activeList.sort((a, b) => {
+        if (rule === "dpd_desc") return b.days_past_due - a.days_past_due;
+        if (rule === "amount_desc") return b.outstanding_amount - a.outstanding_amount;
+        if (rule === "upcoming_first") return (a.payment_status === "UPCOMING" ? -1 : 1);
+        return b.priority_score - a.priority_score;
+      });
+
+      tbody.innerHTML = activeList.map(c => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-2.5 px-3">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold ${c.priority_score >= 75 ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'}">
+              ${c.priority_score}/100
+            </span>
+          </td>
+          <td class="py-2.5 px-3">
+            <p class="font-semibold text-slate-900">${c.full_name}</p>
+            <p class="text-[11px] text-slate-500">${c.customer_code} • <code class="text-emerald-700 font-semibold">${c.loan_account_masked}</code></p>
+          </td>
+          <td class="py-2.5 px-3 text-right font-semibold text-slate-900">
+            ₹${Number(c.outstanding_amount).toLocaleString("en-IN")}
+          </td>
+          <td class="py-2.5 px-3 text-xs">
+            <span class="block text-slate-800">${c.due_date}</span>
+            <span class="text-[11px] ${c.days_past_due > 0 ? 'text-rose-600 font-semibold' : 'text-slate-400'}">
+              ${c.days_past_due > 0 ? c.days_past_due + ' days overdue' : 'On schedule'}
+            </span>
+          </td>
+          <td class="py-2.5 px-3">${statusBadgeHtml(c.payment_status)}</td>
+          <td class="py-2.5 px-3 text-right">
+            <button data-call-cust="${c.id}" class="queue-call-btn px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
+              📞 Call in Hindi
+            </button>
+          </td>
+        </tr>
+      `).join("");
+
+      tbody.querySelectorAll(".queue-call-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          APP_STATE.selectedCustomerId = Number(btn.getAttribute("data-call-cust"));
+          switchTab("calling");
+          startSimulatedCallForSelected();
+        });
+      });
+    }
+
+    function renderRecentCallFeed() {
+      const feed = document.getElementById("recentCallFeed");
+      if (APP_STATE.callLogs.length === 0) {
+        feed.innerHTML = `<p class="text-slate-400 text-xs">No calls logged yet.</p>`;
+        return;
+      }
+      feed.innerHTML = APP_STATE.callLogs.slice(0, 8).map(log => `
+        <div class="p-3 rounded-xl border ${log.outcome === 'BLOCKED_COMPLIANCE_GUARDRAIL' ? 'border-rose-200 bg-rose-50/50' : 'border-slate-200 bg-slate-50/70'} space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-900">${log.customer_name} (${log.customer_code})</span>
+            <span class="text-[11px] text-slate-400">${log.timestamp}</span>
+          </div>
+          <p class="text-slate-600"><strong>Customer:</strong> "${log.utterance}"</p>
+          <p class="text-emerald-800 hindi-text"><strong>AI:</strong> ${log.ai_reply}</p>
+          <div class="flex items-center justify-between pt-1 text-[11px]">
+            <span class="font-semibold text-indigo-700">${log.outcome}</span>
+            ${log.escalated ? `<span class="text-amber-700 font-semibold">⚠ Escalated to Officer</span>` : ''}
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderCustomerDatabase() {
+      const search = (document.getElementById("custSearchInput").value || "").toLowerCase().trim();
+      const statusF = document.getElementById("custStatusFilter").value;
+      const branchF = document.getElementById("custBranchFilter").value;
+
+      const filtered = APP_STATE.customers.filter(c => {
+        if (statusF !== "ALL" && c.payment_status !== statusF) return false;
+        if (branchF !== "ALL" && c.branch !== branchF) return false;
+        if (search) {
+          const hay = `${c.full_name} ${c.customer_code} ${c.loan_account_masked} ${c.phone_number}`.toLowerCase();
+          if (!hay.includes(search)) return false;
+        }
+        return true;
+      });
+
+      const tbody = document.getElementById("customerTableBody");
+      tbody.innerHTML = filtered.map(c => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-2.5 px-3">
+            <p class="font-semibold text-slate-900">${c.full_name}</p>
+            <p class="text-[11px] text-slate-500">${c.customer_code}</p>
+          </td>
+          <td class="py-2.5 px-3 font-mono text-xs text-slate-700">${formatPhoneForRole(c.phone_number)}</td>
+          <td class="py-2.5 px-3">
+            <code class="px-2 py-0.5 rounded bg-slate-100 text-emerald-800 font-semibold text-xs">${c.loan_account_masked}</code>
+          </td>
+          <td class="py-2.5 px-3 text-xs">
+            <span class="block text-slate-800">${c.branch}</span>
+            <span class="text-slate-500">${c.assigned_employee}</span>
+          </td>
+          <td class="py-2.5 px-3 text-xs">${c.due_date}</td>
+          <td class="py-2.5 px-3 text-right font-semibold text-slate-900">₹${Number(c.outstanding_amount).toLocaleString("en-IN")}</td>
+          <td class="py-2.5 px-3">${statusBadgeHtml(c.payment_status)}</td>
+          <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">
+            ${c.payment_status !== "PAID_VERIFIED" ? `
+              <button data-call-id="${c.id}" class="db-call-btn px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold">
+                Call
+              </button>
+              <button data-paid-id="${c.id}" class="db-paid-btn px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold">
+                Verify Paid
+              </button>
+            ` : `<span class="text-[11px] text-teal-700 font-semibold">✓ Reminders Stopped</span>`}
+          </td>
+        </tr>
+      `).join("");
+
+      tbody.querySelectorAll(".db-call-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          APP_STATE.selectedCustomerId = Number(btn.getAttribute("data-call-id"));
+          switchTab("calling");
+          startSimulatedCallForSelected();
+        });
+      });
+
+      tbody.querySelectorAll(".db-paid-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (APP_STATE.currentRole === "auditor") {
+            showToast("Read-Only Role", "Auditor role cannot modify payment verification.", true);
+            return;
+          }
+          const cid = Number(btn.getAttribute("data-paid-id"));
+          const cust = APP_STATE.customers.find(x => x.id === cid);
+          if (!cust) return;
+          cust.payment_status = "PAID_VERIFIED";
+          cust.outstanding_amount = 0;
+          cust.priority_score = 0;
+          APP_STATE.ptpList.forEach(p => {
+            if (p.customer_id === cid) p.followup_status = "KEPT_PAID";
+          });
+          addAuditEntry("VERIFY_PAYMENT_STOP_CALLS", cust.customer_code, `Verified payment for ${cust.full_name} (${cust.loan_account_masked}). Collection reminders automatically stopped.`);
+          renderAll();
+          showToast("Payment Verified & Calls Stopped", `${cust.full_name} (${cust.loan_account_masked}) marked PAID_VERIFIED.`);
+        });
+      });
+    }
+
+    function renderCallControllerCustomerSelect() {
+      const sel = document.getElementById("callCustomerSelect");
+      sel.innerHTML = APP_STATE.customers.map(c => `
+        <option value="${c.id}" ${c.id === APP_STATE.selectedCustomerId ? "selected" : ""}>
+          ${c.customer_code} — ${c.full_name} (${c.loan_account_masked}) | ₹${Number(c.outstanding_amount).toLocaleString("en-IN")} | ${c.payment_status}
+        </option>
+      `).join("");
+
+      const cust = APP_STATE.customers.find(c => c.id === Number(APP_STATE.selectedCustomerId)) || APP_STATE.customers[0];
+      const check = checkGuardrailsForCustomer(cust);
+      document.getElementById("selectedCustomerSummary").innerHTML = `
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-sm text-white">${cust.full_name} (${cust.customer_code})</span>
+          ${statusBadgeHtml(cust.payment_status)}
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1 text-slate-300">
+          <div>Masked Loan: <code class="text-emerald-300 font-semibold">${cust.loan_account_masked}</code></div>
+          <div>Phone: <span class="font-mono">${formatPhoneForRole(cust.phone_number)}</span></div>
+          <div>Outstanding EMI: <strong class="text-white">₹${Number(cust.outstanding_amount).toLocaleString("en-IN")}</strong></div>
+          <div>Due Date: <strong class="text-white">${cust.due_date}</strong> (${cust.days_past_due} DPD)</div>
+        </div>
+        <div class="pt-1.5 border-t border-slate-800 text-[11px] ${check.allowed ? 'text-emerald-400' : 'text-rose-400 font-semibold'}">
+          ${check.allowed ? '✓ RBI Compliance Check Passed: Ready for Hindi AI Call' : '⛔ ' + check.reason}
+        </div>
+      `;
+    }
+
+    function renderPtpTable() {
+      const tbody = document.getElementById("ptpTableBody");
+      if (APP_STATE.ptpList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400">No PTP records yet.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = APP_STATE.ptpList.map(p => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3">
+            <p class="font-semibold text-slate-900">${p.customer_name}</p>
+            <p class="text-[11px] text-slate-500">${p.customer_code} • <code>${p.loan_account_masked}</code></p>
+          </td>
+          <td class="py-2.5 px-3 text-xs text-slate-600">${p.call_datetime}</td>
+          <td class="py-2.5 px-3 text-xs italic text-slate-800">"${p.customer_response}"</td>
+          <td class="py-2.5 px-3 font-semibold text-emerald-700 text-xs">${p.promised_date}</td>
+          <td class="py-2.5 px-3 text-right font-semibold">₹${Number(p.promised_amount).toLocaleString("en-IN")}</td>
+          <td class="py-2.5 px-3">
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold ${p.followup_status === 'KEPT_PAID' ? 'bg-teal-100 text-teal-800' : 'bg-amber-100 text-amber-800'}">
+              ${p.followup_status}
+            </span>
+          </td>
+          <td class="py-2.5 px-3">
+            ${p.followup_status !== "KEPT_PAID" ? `
+              <button data-verify-ptp="${p.customer_id}" class="verify-ptp-btn px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold">
+                Mark Paid
+              </button>
+            ` : `<span class="text-xs text-teal-700 font-semibold">✓ Verified</span>`}
+          </td>
+        </tr>
+      `).join("");
+
+      tbody.querySelectorAll(".verify-ptp-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cid = Number(btn.getAttribute("data-verify-ptp"));
+          const cust = APP_STATE.customers.find(x => x.id === cid);
+          if (!cust) return;
+          cust.payment_status = "PAID_VERIFIED";
+          cust.outstanding_amount = 0;
+          cust.priority_score = 0;
+          APP_STATE.ptpList.forEach(p => {
+            if (p.customer_id === cid) p.followup_status = "KEPT_PAID";
+          });
+          addAuditEntry("PTP_VERIFIED_PAID", cust.customer_code, `PTP honored and verified via banking UTR. Reminders stopped.`);
+          renderAll();
+          showToast("PTP Verified as Paid", `Stopped reminders for ${cust.full_name}.`);
+        });
+      });
+    }
+
+    function getFilteredReportRows() {
+      const dateF = document.getElementById("repDateFilter").value;
+      const empF = document.getElementById("repEmployeeFilter").value;
+      const branchF = document.getElementById("repBranchFilter").value;
+      const outF = document.getElementById("repOutcomeFilter").value;
+
+      return APP_STATE.customers.filter(c => {
+        if (dateF === "OVERDUE_ONLY" && c.due_date > "2026-10-26") return false;
+        if (dateF === "UPCOMING_ONLY" && c.due_date <= "2026-10-26") return false;
+        if (empF !== "ALL" && c.assigned_employee !== empF) return false;
+        if (branchF !== "ALL" && c.branch !== branchF) return false;
+        if (outF !== "ALL" && c.payment_status !== outF) return false;
+        return true;
+      });
+    }
+
+    function renderReportsAndAudit() {
+      const rows = getFilteredReportRows();
+      const totalEmi = rows.reduce((acc, r) => acc + Number(r.emi_amount), 0);
+      const totalOut = rows.reduce((acc, r) => acc + Number(r.outstanding_amount), 0);
+      const ptpOrPaid = rows.filter(r => ["PTP_RECORDED", "PAID_VERIFIED"].includes(r.payment_status)).length;
+      const resolutionPct = rows.length > 0 ? Math.round((ptpOrPaid / rows.length) * 100) : 0;
+
+      document.getElementById("reportMetricsSummary").innerHTML = `
+        <div>
+          <span class="text-slate-400 block">Filtered Accounts</span>
+          <span class="text-lg font-bold">${rows.length} / ${APP_STATE.customers.length}</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Total EMI Billed</span>
+          <span class="text-lg font-bold">₹${totalEmi.toLocaleString("en-IN")}</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">Total Outstanding</span>
+          <span class="text-lg font-bold text-amber-300">₹${totalOut.toLocaleString("en-IN")}</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block">PTP + Verified Paid Rate</span>
+          <span class="text-lg font-bold text-emerald-400">${resolutionPct}% (${ptpOrPaid} accts)</span>
+        </div>
+      `;
+
+      document.getElementById("reportPreviewTableBody").innerHTML = rows.map(r => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2 px-3 font-semibold">${r.full_name} (${r.customer_code})</td>
+          <td class="py-2 px-3"><code>${r.loan_account_masked}</code></td>
+          <td class="py-2 px-3">${r.branch}</td>
+          <td class="py-2 px-3">${r.assigned_employee}</td>
+          <td class="py-2 px-3">${r.due_date}</td>
+          <td class="py-2 px-3 text-right">₹${Number(r.emi_amount).toLocaleString("en-IN")}</td>
+          <td class="py-2 px-3 text-right font-semibold">₹${Number(r.outstanding_amount).toLocaleString("en-IN")}</td>
+          <td class="py-2 px-3">${statusBadgeHtml(r.payment_status)}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("auditLogTableBody").innerHTML = APP_STATE.auditLogs.map(a => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2 px-3 font-mono text-[11px] text-slate-500">${a.timestamp}</td>
+          <td class="py-2 px-3 font-medium text-slate-800">${a.actor}</td>
+          <td class="py-2 px-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-semibold text-[11px]">${a.action}</span></td>
+          <td class="py-2 px-3 font-mono text-xs">${a.target}</td>
+          <td class="py-2 px-3 text-slate-600">${a.details}</td>
+        </tr>
+      `).join("");
+    }
+
+    // =========================================================================
+    // INTERACTIVE HINDI CALLING WORKFLOW
+    // =========================================================================
+    function appendTranscriptBubble(speaker, hindiText, subText, badgeText = "") {
+      const container = document.getElementById("callTranscriptContainer");
+      const isAi = speaker === "AI Assistant";
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex flex-col ${isAi ? "items-start" : "items-end"}`;
+      wrapper.innerHTML = `
+        <div class="max-w-xl rounded-2xl px-4 py-3 text-xs sm:text-sm shadow-sm border ${
+          isAi ? "bg-white border-slate-200 text-slate-900" : "bg-emerald-600 border-emerald-700 text-white"
+        }">
+          <div class="flex items-center justify-between gap-3 mb-1">
+            <span class="font-bold text-[11px] uppercase tracking-wider ${isAi ? "text-emerald-700" : "text-emerald-100"}">
+              ${speaker}
+            </span>
+            ${badgeText ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">${badgeText}</span>` : ""}
+          </div>
+          <p class="hindi-text font-medium leading-relaxed">${hindiText}</p>
+          ${subText ? `<p class="text-[11px] mt-1 ${isAi ? "text-slate-500" : "text-emerald-100"}">${subText}</p>` : ""}
+        </div>
+      `;
+      container.appendChild(wrapper);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function startSimulatedCallForSelected() {
+      const cust = APP_STATE.customers.find(c => c.id === Number(APP_STATE.selectedCustomerId));
+      if (!cust) return;
+
+      const container = document.getElementById("callTranscriptContainer");
+      container.innerHTML = "";
+
+      const check = checkGuardrailsForCustomer(cust);
+      if (!check.allowed) {
+        APP_STATE.activeCallSession = false;
+        document.getElementById("callLiveDot").className = "w-3 h-3 rounded-full bg-rose-500";
+        document.getElementById("callConsoleTitle").textContent = `Call Blocked by Compliance Guardrail — ${cust.full_name}`;
+        appendTranscriptBubble("System Guardrail", check.reason, "RBI Fair Practices Code & DLT Protection Active", "BLOCKED");
+        APP_STATE.callLogs.unshift({
+          call_reference: "CALL-BLK-" + Math.floor(100 + Math.random() * 900),
+          customer_id: cust.id,
+          customer_code: cust.customer_code,
+          customer_name: cust.full_name,
+          timestamp: `2026-10-26 ${String(APP_STATE.simulatedHourIST).padStart(2, "0")}:15 IST`,
+          initiated_by: APP_STATE.currentUser,
+          utterance: "(Call Blocked Before Dialing)",
+          ai_reply: check.reason,
+          intent: "BLOCKED_BY_GUARDRAIL",
+          outcome: "BLOCKED_COMPLIANCE_GUARDRAIL",
+          escalated: false
+        });
+        addAuditEntry("CALL_BLOCKED_GUARDRAIL", cust.customer_code, check.reason);
+        renderAll();
+        showToast("Call Blocked by Guardrail", check.reason, true);
+        return;
+      }
+
+      APP_STATE.activeCallSession = true;
+      document.getElementById("endActiveCallBtn").disabled = false;
+      document.getElementById("callLiveDot").className = "w-3 h-3 rounded-full bg-emerald-400 pulse-ring";
+      document.getElementById("callConsoleTitle").textContent = `Active Hindi AI Call — ${cust.full_name} (${cust.loan_account_masked})`;
+      document.getElementById("callConsoleSubtitle").textContent = `Safe Simulator Mode • Verified Identity Gate Active`;
+
+      const consentChecked = document.getElementById("chkConsentDisclosure").checked;
+      const verifyChecked = document.getElementById("chkVerifyIdentity").checked;
+
+      // Step 1: Greeting + Identity Verification
+      const introHindi = `नमस्ते! क्या मेरी बात ${cust.full_name} जी से हो रही है? मैं भारत समृद्धि फाइनेंस लिमिटेड की ओर से अधिकृत AI कॉलिंग सहायक बोल रहा हूँ। ${
+        consentChecked ? "गुणवत्ता और सुरक्षा के लिए यह कॉल रिकॉर्ड की जा सकती है।" : ""
+      }`;
+      appendTranscriptBubble(
+        "AI Assistant",
+        introHindi,
+        `Namaste! Kya meri baat ${cust.full_name} ji se ho rahi hai? Main Bharat Samriddhi Finance Ltd. ki taraf se authorized AI calling assistant bol raha hoon.`,
+        "STEP 1: INTRO & CONSENT"
+      );
+
+      if (verifyChecked) {
+        appendTranscriptBubble(
+          "Customer",
+          `हाँ, मैं ${cust.full_name} बोल रहा हूँ।`,
+          "Identity confirmed before sharing sensitive loan figures.",
+          "IDENTITY VERIFIED"
+        );
+      }
+
+      // Step 2: Verified EMI Disclosure with Masked Loan Number
+      const amtStr = "₹" + Number(cust.outstanding_amount).toLocaleString("en-IN");
+      const emiHindi = cust.payment_status === "UPCOMING"
+        ? `धन्यवाद ${cust.full_name} जी। हमारे सत्यापित रिकॉर्ड के अनुसार, आपके ऋण खाता ${cust.loan_account_masked} की आगामी EMI राशि ${amtStr} दिनांक ${cust.due_date} को देय (due) है। आप यह भुगतान कब तक करने की उम्मीद रखते हैं?`
+        : `धन्यवाद ${cust.full_name} जी। हमारे सत्यापित रिकॉर्ड के अनुसार, आपके ऋण खाता ${cust.loan_account_masked} की EMI राशि ${amtStr} (देय तिथि: ${cust.due_date}) अभी लंबित है। कृपया बताएं कि आप यह भुगतान कब तक कर पाएंगे?`;
+
+      appendTranscriptBubble(
+        "AI Assistant",
+        emiHindi,
+        `Account ${cust.loan_account_masked} | Verified Outstanding: ${amtStr} | Due: ${cust.due_date}`,
+        "STEP 2: VERIFIED EMI REMINDER"
+      );
+
+      speakHindiText(introHindi + " " + emiHindi);
+    }
+
+    function handleCustomerUtteranceSubmission(utteranceText) {
+      const cust = APP_STATE.customers.find(c => c.id === Number(APP_STATE.selectedCustomerId));
+      if (!cust) return;
+
+      if (!APP_STATE.activeCallSession) {
+        startSimulatedCallForSelected();
+        if (!APP_STATE.activeCallSession) return;
+      }
+
+      appendTranscriptBubble("Customer", utteranceText, "Customer response received", "CUSTOMER REPLY");
+
+      const result = evaluateCustomerHindiResponse(utteranceText, cust);
+      appendTranscriptBubble("AI Assistant", result.hindiReply, result.hinglishReply, result.intent);
+      speakHindiText(result.hindiReply);
+
+      // Update Inspector Bar
+      document.getElementById("inspectIntent").textContent = result.intent;
+      document.getElementById("inspectPtpDate").textContent = result.ptpDate || "None";
+      document.getElementById("inspectOutcome").textContent = result.outcome;
+      document.getElementById("inspectEscalation").textContent = result.escalationNote;
+
+      // Update Customer State & Counters
+      cust.payment_status = result.newStatus;
+      cust.calls_today += 1;
+
+      const timestampStr = `2026-10-26 ${String(APP_STATE.simulatedHourIST).padStart(2, "0")}:${String(new Date().getMinutes()).padStart(2, "0")} IST`;
+      APP_STATE.callLogs.unshift({
+        call_reference: "CALL-" + Math.floor(1000 + Math.random() * 9000),
+        customer_id: cust.id,
+        customer_code: cust.customer_code,
+        customer_name: cust.full_name,
+        timestamp: timestampStr,
+        initiated_by: APP_STATE.currentUser,
+        utterance: utteranceText,
+        ai_reply: result.hindiReply,
+        intent: result.intent,
+        outcome: result.outcome,
+        escalated: result.escalate
+      });
+
+      if (result.ptpDate) {
+        APP_STATE.ptpList.unshift({
+          ptp_reference: "PTP-" + Math.floor(1000 + Math.random() * 9000),
+          customer_id: cust.id,
+          customer_code: cust.customer_code,
+          customer_name: cust.full_name,
+          loan_account_masked: cust.loan_account_masked,
+          call_datetime: timestampStr,
+          customer_response: utteranceText,
+          promised_date: result.ptpDate,
+          promised_amount: cust.outstanding_amount,
+          followup_status: result.followupStatus,
+          call_outcome: result.outcome
+        });
+      }
+
+      addAuditEntry(
+        `AI_CALL_${result.outcome}`,
+        cust.customer_code,
+        `Utterance="${utteranceText}" | Status->${result.newStatus} | PTP=${result.ptpDate || "N/A"}`
+      );
+
+      renderAll();
+      showToast(
+        `Outcome: ${result.outcome}`,
+        result.ptpDate ? `Recorded PTP date ${result.ptpDate} for ${cust.full_name}` : result.hinglishReply
+      );
+    }
+
+    // =========================================================================
+    // TAB NAVIGATION & EVENT LISTENERS
+    // =========================================================================
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-panel").forEach(sec => sec.classList.add("hidden"));
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.remove("hidden");
+
+      document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+        if (btn.getAttribute("data-tab") === tabId) {
+          btn.className = "nav-tab-btn px-3.5 py-2 rounded-lg bg-emerald-600 text-white transition";
+        } else {
+          btn.className = "nav-tab-btn px-3.5 py-2 rounded-lg text-slate-300 hover:bg-slate-800 transition";
+        }
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      // Tab switching
+      document.querySelectorAll(".nav-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
+      });
+
+      // Toast close
+      document.getElementById("closeToastBtn").addEventListener("click", () => {
+        document.getElementById("toastBanner").classList.add("hidden");
+      });
+
+      // IST Clock & Role Switchers
+      document.getElementById("simHourSelect").addEventListener("change", (e) => {
+        APP_STATE.simulatedHourIST = Number(e.target.value);
+        renderAll();
+        showToast("Simulated IST Time Updated", `Clock set to ${APP_STATE.simulatedHourIST}:00 IST.`);
+      });
+
+      document.getElementById("rbacRoleSelect").addEventListener("change", (e) => {
+        APP_STATE.currentRole = e.target.value;
+        APP_STATE.currentUser = e.target.value === "supervisor"
+          ? "Priya Singh"
+          : (e.target.value === "collection_agent" ? "Amit Verma" : "Compliance Auditor");
+        renderAll();
+        showToast("RBAC Role Switched", `Active role: ${APP_STATE.currentRole} (${APP_STATE.currentUser})`);
+      });
+
+      // Priority Queue Sorting & Batch Trigger
+      document.getElementById("priorityRuleSelect").addEventListener("change", (e) => {
+        APP_STATE.prioritySortRule = e.target.value;
+        renderPriorityQueue();
+      });
+
+      document.getElementById("jumpToVoiceSimulatorBtn").addEventListener("click", () => {
+        switchTab("calling");
+        startSimulatedCallForSelected();
+      });
+
+      document.getElementById("quickRunBatchBtn").addEventListener("click", () => {
+        const eligible = APP_STATE.customers.filter(c => checkGuardrailsForCustomer(c).allowed);
+        if (eligible.length === 0) {
+          showToast("Batch Blocked", "No eligible customers or current IST time is outside 08:00–19:00 window.", true);
+          return;
+        }
+        const topCust = eligible[0];
+        APP_STATE.selectedCustomerId = topCust.id;
+        switchTab("calling");
+        startSimulatedCallForSelected();
+        showToast("Priority Campaign Started", `Dialed highest priority customer: ${topCust.full_name} (${topCust.loan_account_masked})`);
+      });
+
+      // Customer DB Filters & Add Customer
+      ["custSearchInput", "custStatusFilter", "custBranchFilter"].forEach(id => {
+        document.getElementById(id).addEventListener("input", renderCustomerDatabase);
+        document.getElementById(id).addEventListener("change", renderCustomerDatabase);
+      });
+
+      document.getElementById("openAddCustomerModalBtn").addEventListener("click", () => {
+        document.getElementById("addCustomerCard").classList.remove("hidden");
+      });
+      document.getElementById("closeAddCustomerBtn").addEventListener("click", () => {
+        document.getElementById("addCustomerCard").classList.add("hidden");
+      });
+
+      document.getElementById("saveNewCustomerBtn").addEventListener("click", () => {
+        const name = document.getElementById("newCustName").value.trim() || "Suresh Kumar";
+        const phone = document.getElementById("newCustPhone").value.trim() || "+919810055112";
+        const rawLoan = document.getElementById("newCustLoan").value.trim() || "889120349912";
+        const due = document.getElementById("newCustDue").value || "2026-10-28";
+        const amt = Number(document.getElementById("newCustAmount").value || 4200);
+        const st = document.getElementById("newCustStatus").value;
+
+        const newId = APP_STATE.customers.length + 1;
+        const code = `CUST-100${newId}`;
+        const masked = maskLoanAccount(rawLoan);
+
+        APP_STATE.customers.unshift({
+          id: newId,
+          customer_code: code,
+          full_name: name,
+          phone_number: phone,
+          loan_account_masked: masked,
+          branch: st === "OVERDUE" ? "Patna Main" : "Gaya Branch",
+          assigned_employee: APP_STATE.currentUser,
+          preferred_language: "hi-IN",
+          emi_amount: amt,
+          outstanding_amount: amt,
+          due_date: due,
+          days_past_due: st === "OVERDUE" ? 5 : 0,
+          payment_status: st,
+          priority_score: st === "OVERDUE" ? 80 : 58,
+          calls_today: 0,
+          consent_authorized: true,
+          opted_out: false,
+          notes: "Added manually with masked loan number"
+        });
+        addAuditEntry("ADD_CUSTOMER_MASKED", code, `Added ${name} with masked loan ${masked}`);
+        document.getElementById("addCustomerCard").classList.add("hidden");
+        renderAll();
+        showToast("Customer Saved & Loan Masked", `Added ${name} (${masked}). Raw loan number hidden.`);
+      });
+
+      document.getElementById("loadSampleBatchBtn").addEventListener("click", () => {
+        const nextId = APP_STATE.customers.length + 1;
+        APP_STATE.customers.push(
+          {
+            id: nextId,
+            customer_code: `CUST-100${nextId}`,
+            full_name: "Pंकज कुमार वर्मा (Pankaj Verma)",
+            phone_number: "+919810077001",
+            loan_account_masked: "LN-XXXX-8194",
+            branch: "Patna Main",
+            assigned_employee: "Amit Verma",
+            preferred_language: "hi-IN",
+            emi_amount: 5600,
+            outstanding_amount: 5600,
+            due_date: "2026-10-21",
+            days_past_due: 5,
+            payment_status: "OVERDUE",
+            priority_score: 81,
+            calls_today: 0,
+            consent_authorized: true,
+            opted_out: false,
+            notes: "Sample imported record"
+          },
+          {
+            id: nextId + 1,
+            customer_code: `CUST-100${nextId + 1}`,
+            full_name: "Rekha Sinha",
+            phone_number: "+919810077002",
+            loan_account_masked: "LN-XXXX-3049",
+            branch: "Muzaffarpur",
+            assigned_employee: "Priya Singh",
+            preferred_language: "hi-IN",
+            emi_amount: 4100,
+            outstanding_amount: 4100,
+            due_date: "2026-10-29",
+            days_past_due: 0,
+            payment_status: "UPCOMING",
+            priority_score: 55,
+            calls_today: 0,
+            consent_authorized: true,
+            opted_out: false,
+            notes: "Sample upcoming EMI"
+          }
+        );
+        addAuditEntry("SAMPLE_BATCH_IMPORT", "CSV-BATCH", "Imported 2 additional sample customer records with masked loan IDs.");
+        renderAll();
+        showToast("Imported 2 Sample Customers", "Loan account numbers masked as LN-XXXX-8194 and LN-XXXX-3049.");
+      });
+
+      // CSV File Upload Parser
+      document.getElementById("csvFileInput").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const lines = String(evt.target.result || "").split(/\r?\n/).filter(Boolean);
+          if (lines.length < 2) {
+            showToast("CSV Empty", "Please upload a CSV with header and data rows.", true);
+            return;
+          }
+          const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+          let count = 0;
+          for (let i = 1; i < lines.length; i++) {
+            const cols = lines[i].split(",").map(c => c.trim());
+            if (cols.length < 3) continue;
+            const rowObj = {};
+            headers.forEach((h, idx) => { rowObj[h] = cols[idx] || ""; });
+            const nid = APP_STATE.customers.length + 1;
+            const code = rowObj.customer_code || `CUST-IMP-${nid}`;
+            const masked = maskLoanAccount(rowObj.loan_account_masked || rowObj.loan_account || "9912");
+            const amt = Number(rowObj.outstanding_amount || rowObj.emi_amount || 3500);
+            APP_STATE.customers.push({
+              id: nid,
+              customer_code: code,
+              full_name: rowObj.full_name || rowObj.name || `Customer ${nid}`,
+              phone_number: rowObj.phone_number || rowObj.phone || "+919810000000",
+              loan_account_masked: masked,
+              branch: rowObj.branch || "Patna Main",
+              assigned_employee: rowObj.assigned_employee || APP_STATE.currentUser,
+              preferred_language: "hi-IN",
+              emi_amount: amt,
+              outstanding_amount: amt,
+              due_date: rowObj.due_date || "2026-10-28",
+              days_past_due: Number(rowObj.days_past_due || 2),
+              payment_status: rowObj.payment_status || "OVERDUE",
+              priority_score: 75,
+              calls_today: 0,
+              consent_authorized: true,
+              opted_out: false,
+              notes: "Imported from CSV"
+            });
+            count++;
+          }
+          addAuditEntry("CSV_FILE_IMPORT", file.name, `Imported ${count} rows with automatic loan account masking.`);
+          renderAll();
+          showToast("CSV Import Successful", `Imported ${count} customer records from ${file.name}.`);
+        };
+        reader.readAsText(file);
+      });
+
+      // Calling Console Events
+      document.getElementById("callCustomerSelect").addEventListener("change", (e) => {
+        APP_STATE.selectedCustomerId = Number(e.target.value);
+        renderCallControllerCustomerSelect();
+      });
+
+      document.getElementById("startManualCallBtn").addEventListener("click", () => {
+        startSimulatedCallForSelected();
+      });
+
+      document.getElementById("endActiveCallBtn").addEventListener("click", () => {
+        APP_STATE.activeCallSession = false;
+        document.getElementById("endActiveCallBtn").disabled = true;
+        document.getElementById("callLiveDot").className = "w-3 h-3 rounded-full bg-slate-500";
+        appendTranscriptBubble("System", "कॉल समाप्त हो गई है। (Call ended safely)", "Session closed", "CALL ENDED");
+      });
+
+      document.querySelectorAll(".preset-phrase-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const phrase = btn.getAttribute("data-phrase");
+          handleCustomerUtteranceSubmission(phrase);
+        });
+      });
+
+      document.getElementById("sendUtteranceBtn").addEventListener("click", () => {
+        const input = document.getElementById("customUtteranceInput");
+        const val = input.value.trim();
+        if (!val) return;
+        input.value = "";
+        handleCustomerUtteranceSubmission(val);
+      });
+
+      document.getElementById("customUtteranceInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          document.getElementById("sendUtteranceBtn").click();
+        }
+      });
+
+      document.getElementById("replayLastAiVoiceBtn").addEventListener("click", () => {
+        if (APP_STATE.lastAiHindiSpeech) {
+          speakHindiText(APP_STATE.lastAiHindiSpeech);
+          showToast("Playing Hindi Voice", "Speaking last AI Hindi response via browser Web Speech API.");
+        } else {
+          showToast("No Active Speech", "Start a call first to hear the Hindi AI assistant.", true);
+        }
+      });
+
+      document.getElementById("micSpeechBtn").addEventListener("click", () => {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) {
+          showToast("Speech Recognition Unavailable", "Your browser iframe blocks microphone STT; use the 1-tap Hindi preset buttons or text box.", true);
+          return;
+        }
+        try {
+          const rec = new SpeechRec();
+          rec.lang = "hi-IN";
+          rec.interimResults = false;
+          rec.onresult = (evt) => {
+            const spoken = evt.results[0][0].transcript;
+            document.getElementById("customUtteranceInput").value = spoken;
+            handleCustomerUtteranceSubmission(spoken);
+          };
+          rec.onerror = () => {
+            showToast("Mic Permission Blocked in Sandbox", "Use the 1-tap Hindi buttons or type your response below.", true);
+          };
+          rec.start();
+          showToast("Listening in Hindi (hi-IN)...", "Speak now (e.g., 'Main aaj payment kar dunga')");
+        } catch (err) {
+          showToast("Mic Unavailable", "Use the 1-tap Hindi preset buttons to test immediately.", true);
+        }
+      });
+
+      // Schedule Config Save
+      document.getElementById("saveScheduleConfigBtn").addEventListener("click", () => {
+        APP_STATE.permittedStartHour = Number(document.getElementById("cfgStartHour").value || 8);
+        APP_STATE.permittedEndHour = Number(document.getElementById("cfgEndHour").value || 19);
+        APP_STATE.maxCallsPerDay = Number(document.getElementById("cfgMaxDaily").value || 2);
+        const slot = document.getElementById("cfgCampaignSlot").value;
+        addAuditEntry("UPDATE_CALL_SCHEDULE", "GUARDRAILS", `Window=${APP_STATE.permittedStartHour}:00-${APP_STATE.permittedEndHour}:00 IST, MaxDaily=${APP_STATE.maxCallsPerDay}, Slot=${slot}`);
+        renderAll();
+        showToast("Calling Schedule Saved", `Permitted window: ${APP_STATE.permittedStartHour}:00–${APP_STATE.permittedEndHour}:00 IST (Max ${APP_STATE.maxCallsPerDay}/day).`);
+      });
+
+      // Report Filters & CSV Export
+      ["repDateFilter", "repEmployeeFilter", "repBranchFilter", "repOutcomeFilter"].forEach(id => {
+        document.getElementById(id).addEventListener("change", renderReportsAndAudit);
+      });
+
+      document.getElementById("exportFilteredCsvBtn").addEventListener("click", () => {
+        const rows = getFilteredReportRows();
+        const headers = ["customer_code", "full_name", "loan_account_masked", "branch", "assigned_employee", "due_date", "emi_amount", "outstanding_amount", "payment_status"];
+        const csvLines = [
+          headers.join(","),
+          ...rows.map(r => [
+            r.customer_code,
+            `"${r.full_name}"`,
+            r.loan_account_masked,
+            `"${r.branch}"`,
+            `"${r.assigned_employee}"`,
+            r.due_date,
+            r.emi_amount,
+            r.outstanding_amount,
+            r.payment_status
+          ].join(","))
+        ];
+        const blob = new Blob([csvLines.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "authorized_loan_collection_report.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        addAuditEntry("EXPORT_CSV_REPORT", "CSV_EXPORT", `Exported ${rows.length} filtered customer rows to CSV.`);
+        renderReportsAndAudit();
+        showToast("CSV Report Exported", `Downloaded ${rows.length} filtered records with masked loan account references.`);
+      });
+
+      // Code Viewer Tabs
+      const codeBox = document.getElementById("codePreviewBox");
+      codeBox.textContent = CODE_SNIPPETS.env;
+      document.querySelectorAll(".code-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const key = btn.getAttribute("data-codefile");
+          codeBox.textContent = CODE_SNIPPETS[key] || "";
+          document.querySelectorAll(".code-tab-btn").forEach(b => {
+            b.className = "code-tab-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium";
+          });
+          btn.className = "code-tab-btn px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium";
+        });
+      });
+
+      document.getElementById("directPhoneDialBtn").addEventListener("click", () => {
+        const rawPhone = (document.getElementById("directPhoneDialInput").value || "").trim();
+        const digits = rawPhone.replace(/\D/g, "").slice(-10);
+        if (digits.length < 10) {
+          showToast("Invalid Phone Number", "Please enter a valid 10-digit Indian mobile number.", true);
+          return;
+        }
+        const formattedPhone = "+91" + digits;
+        let match = APP_STATE.customers.find(c => c.phone_number.replace(/\D/g, "").slice(-10) === digits);
+        if (!match) {
+          const newId = APP_STATE.customers.length + 1;
+          match = {
+            id: newId,
+            customer_code: "CUST-10" + newId,
+            full_name: "Authorized Customer (" + digits + ")",
+            phone_number: formattedPhone,
+            loan_account_masked: "LN-XXXX-" + digits.slice(-4),
+            branch: "Patna Main",
+            assigned_employee: APP_STATE.currentUser,
+            preferred_language: "hi-IN",
+            emi_amount: 4800,
+            outstanding_amount: 4800,
+            due_date: "2026-10-25",
+            days_past_due: 1,
+            payment_status: "OVERDUE",
+            priority_score: 85,
+            calls_today: 0,
+            consent_authorized: true,
+            opted_out: false,
+            notes: "Added via Quick Dial for safe Hindi AI simulation"
+          };
+          APP_STATE.customers.unshift(match);
+          addAuditEntry("QUICK_DIAL_LOOKUP", match.customer_code, "Registered authorized number " + formattedPhone + " for safe Hindi voice simulation.");
+        }
+        APP_STATE.selectedCustomerId = match.id;
+        renderAll();
+        switchTab("calling");
+        startSimulatedCallForSelected();
+        showToast("Safe Hindi Simulator Started", "Simulating Hindi AI call for " + formattedPhone + " (Real PSTN requires paid Twilio/Exotel).");
+      });
+
+      // Initial render & open Hindi AI Voice Caller for +916201872651
+      renderAll();
+      switchTab("calling");
+      startSimulatedCallForSelected();
+    });
+  </script>
+</body>
+</html>

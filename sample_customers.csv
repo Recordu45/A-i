@@ -1,0 +1,9 @@
+customer_code,full_name,phone_number,loan_account_masked,branch,assigned_employee,preferred_language,emi_amount,outstanding_amount,due_date,days_past_due,payment_status,consent_authorized,opted_out,notes
+CUST-1001,Rajesh Kumar Sharma,+919810011001,LN-XXXX-4821,Patna Main,Amit Verma,hi-IN,4500.00,4500.00,2026-10-20,6,OVERDUE,true,false,Two-wheeler loan installment overdue
+CUST-1002,Sunita Devi,+919810011002,LN-XXXX-7390,Gaya Branch,Priya Singh,hi-IN,3200.00,3200.00,2026-10-22,4,OVERDUE,true,false,MSME micro-enterprise installment
+CUST-1003,Vikramaditya Singh,+919810011003,LN-XXXX-1154,Muzaffarpur,Amit Verma,hi-IN,8750.00,8750.00,2026-10-28,0,UPCOMING,true,false,Upcoming EMI reminder due on 28 Oct
+CUST-1004,Meena Kumari,+919810011004,LN-XXXX-9042,Patna Main,Priya Singh,hi-IN,5100.00,5100.00,2026-10-18,8,PTP_RECORDED,true,false,Promised payment on 28 October
+CUST-1005,Anil Prasad Yadav,+919810011005,LN-XXXX-6631,Bhagalpur,Rohan Das,hi-IN,6400.00,0.00,2026-10-15,0,PAID_VERIFIED,true,false,UPI payment verified in core banking; collection stopped
+CUST-1006,Farhan Akhtar Siddiqui,+919810011006,LN-XXXX-3319,Darbhanga,Rohan Das,hi-IN,7200.00,14400.00,2026-10-05,21,HARDSHIP_REVIEW,true,false,Reported temporary medical hardship; escalated to officer
+CUST-1007,Kavita Mishra,+919810011007,LN-XXXX-5582,Patna Main,Amit Verma,en-IN,9500.00,9500.00,2026-10-27,0,UPCOMING,true,false,Prefers bilingual Hindi/English reminder
+CUST-1008,Deepak Paswan,+919810011008,LN-XXXX-2208,Gaya Branch,Priya Singh,hi-IN,2850.00,2850.00,2026-10-19,7,OVERDUE,true,false,Requested afternoon callback after 3 PM
